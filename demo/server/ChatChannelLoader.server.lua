@@ -1,25 +1,24 @@
 --[[
-    Sets up ChatChannelService on the server
+  Adds moderator channel to users above certain rank
 ]]
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Configuration = {
+  GroupId = 10775756,
+  MinimumRank = 6
+}
+
 local Players = game:GetService("Players")
-local TextChatService = game:GetService("TextChatService")
 
-local ChatChannelService = require(ReplicatedStorage:WaitForChild("ChatChannelService"))
-
+-- Create the custom channels folder
 local ChatChannels = Instance.new("Folder")
 ChatChannels.Name = "ChatChannels"
 ChatChannels.Parent = TextChatService
 
--- Setup on server
-ChatChannelService:Setup()
-
--- Create custom channel
+-- Create the custom channel
 local Moderators = Instance.new("TextChannel")
 Moderators.Name = "Moderators"
 
--- Add custom color to the prefix
+-- Add a custom color to the prefix
 Moderators:SetAttribute("ChatColor", Color3.fromHex("#00f7ad"))
 
 -- Parent channel
@@ -27,7 +26,9 @@ Moderators.Parent = ChatChannels
 
 -- Add players to it
 local function AddPlayerToModerator(player: Player)
-    Moderators:AddUserAsync(player.UserId)
+    if player:GetRankInGroup(Configuration.GroupId) >= Configuration.MinimumRank then
+      Moderators:AddUserAsync(player.UserId)
+    end
 end
 
 -- Make sure all players get added
