@@ -1,0 +1,22 @@
+{
+  "name": "ChatChannelService",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "ChatChannelService": {
+        "$path": "src/"
+      }
+    },
+
+    "ServerScriptService": {
+      "$path": "demo/server"
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "$path": "demo/client"
+      }
+    }
+  }
+}
