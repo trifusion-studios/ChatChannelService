@@ -5,20 +5,22 @@ export type Channel = {
     unread: boolean,
     unreadTween: Tween?,
     instance: TextButton,
-    color: Color3,
+    color: Color3?,
+    channel: TextChannel,
 
     OnSelected: (selected: boolean) -> (),
     OnMessage: () -> (),
     OnActivated: (callback: (inputObject: InputObject, clickCount: number) -> ()) -> RBXScriptConnection
 }
 
-return function(name: string, color: Color3)
+return function(name: string, color: Color3?, originalTextChannel: TextChannel)
     local self = {
         selected = false,
         unread = false,
         unreadTween = nil,
         instance = nil,
-        color = color
+        color = color or nil,
+        channel = originalTextChannel
     } :: Channel
 
 	local Channel = Instance.new("TextButton")
@@ -31,7 +33,7 @@ return function(name: string, color: Color3)
 	Channel.BackgroundColor3 = Color3.fromRGB(43, 47, 50)
 	Channel.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	Channel.BorderSizePixel = 0
-	Channel.Size = UDim2.new(0, (Channel.TextBounds.X + 10), 0.9, 0)
+	Channel.Size = UDim2.new(0, 200, 0.9, 0)
 	Channel.ZIndex = 2
 
 	local Corner = Instance.new("UICorner")
@@ -68,8 +70,9 @@ return function(name: string, color: Color3)
 
     function self.OnMessage()
         if self.selected == false and type(self.unreadTween) == "nil" then
-            -- Set begin transparency to 0
+            -- Setup UIStroke
             UIStroke.Transparency = 0
+            UIStroke.Enabled = true
 
             local tween = TweenService:Create(
                 UIStroke, 
@@ -103,6 +106,24 @@ return function(name: string, color: Color3)
 
     function self.OnActivated(callback: (inputObject: InputObject, clickCount: number) -> ()): RBXScriptConnection
         return self.instance.Activated:Connect(callback)
+    end
+
+    self.instance.Changed:Connect(function(property: string)
+        if property == "TextBounds" then
+            self.instance.Size = UDim2.new(0, (self.instance.TextBounds.X + 10), 0.9, 0)
+        end
+    end)
+
+    originalTextChannel.OnIncomingMessage = function(message: TextChatMessage)
+        if self.color then
+            local newProperties = Instance.new("TextChatMessageProperties")
+
+            newProperties.PrefixText = `<font color='#{self.color:ToHex():lower()}'>{message.PrefixText}</font>`
+
+            return newProperties
+        else
+            return nil
+        end
     end
 
     return self

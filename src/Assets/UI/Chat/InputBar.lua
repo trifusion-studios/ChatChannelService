@@ -1,5 +1,3 @@
--- TODO: Fix TextBox not updating color when text has been inputted
-
 return function(): (Frame, TextBox, TextButton)
 	local InputBar = Instance.new("Frame")
 	InputBar.Name = "chatInputBar"

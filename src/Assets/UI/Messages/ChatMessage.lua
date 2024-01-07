@@ -4,6 +4,7 @@ return function(originalMessage: TextChatMessage): Frame
 	Message.AutomaticSize = Enum.AutomaticSize.XY
 	Message.BackgroundTransparency = 1
 	Message.Size = UDim2.fromScale(1, 0)
+	-- Message.LayoutOrder = originalMessage.Timestamp
 
 	local TextLabel = Instance.new("Frame")
 	TextLabel.Name = "TextLabel"

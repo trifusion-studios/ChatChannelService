@@ -1,4 +1,4 @@
-return function()
+return function(): (Frame, Frame)
 	local Window = Instance.new("Frame")
 	Window.Name = "chatWindow"
 	Window.BackgroundColor3 = Color3.fromRGB(25, 27, 29)
@@ -65,5 +65,5 @@ return function()
 	
 	View.Parent = Window
 
-    return Window
+    return Window, RCTScrollContentView
 end
