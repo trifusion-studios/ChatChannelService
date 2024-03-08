@@ -9,6 +9,7 @@ local Configuration = {
 
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Create the custom channels folder
 local ChatChannels = Instance.new("Folder")
@@ -37,3 +38,6 @@ Players.PlayerAdded:Connect(AddPlayerToModerator)
 for _, player: Player in Players:GetPlayers() do
     task.spawn(AddPlayerToModerator, player)
 end
+
+-- Initialize server side of ChatChannelService
+require(ReplicatedStorage:WaitForChild("ChatChannelService")):Setup()
