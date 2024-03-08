@@ -8,6 +8,7 @@ local Configuration = {
 }
 
 local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
 
 -- Create the custom channels folder
 local ChatChannels = Instance.new("Folder")
