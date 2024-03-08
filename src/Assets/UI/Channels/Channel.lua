@@ -1,6 +1,7 @@
 local TweenService = game:GetService("TweenService")
 
 export type Channel = {
+    name: string,
     selected: boolean,
     unread: boolean,
     unreadTween: Tween?,
@@ -10,11 +11,14 @@ export type Channel = {
 
     OnSelected: (selected: boolean) -> (),
     OnMessage: () -> (),
+    Destroy: () -> nil,
+
     OnActivated: (callback: (inputObject: InputObject, clickCount: number) -> ()) -> RBXScriptConnection
 }
 
 return function(name: string, color: Color3?, originalTextChannel: TextChannel)
     local self = {
+        name = name,
         selected = false,
         unread = false,
         unreadTween = nil,
@@ -108,13 +112,28 @@ return function(name: string, color: Color3?, originalTextChannel: TextChannel)
         return self.instance.Activated:Connect(callback)
     end
 
-    self.instance.Changed:Connect(function(property: string)
+    function self.Destroy(): nil
+        self._instanceChangedConnection:Disconnect()
+
+        self.instance:Destroy()
+
+        self = nil
+
+        return self
+    end
+
+    self._instanceChangedConnection = self.instance.Changed:Connect(function(property: string)
         if property == "TextBounds" then
             self.instance.Size = UDim2.new(0, (self.instance.TextBounds.X + 10), 0.9, 0)
         end
     end)
 
     originalTextChannel.OnIncomingMessage = function(message: TextChatMessage)
+        if not self then
+            -- Prevent when destroyed still changing colors
+            return nil
+        end
+
         if self.color then
             local newProperties = Instance.new("TextChatMessageProperties")
 
