@@ -164,7 +164,10 @@ function Overflow.updateBoundary(alignment)
 		local nearestXPos = nearestCenterIcon.widget.AbsolutePosition.X
 		local centerBoundary = (isLeft and nearestXPos)
 			or nearestXPos + nearestCenterIcon.widget.AbsoluteSize.X + topbarInset
-		if isLeft and centerBoundary - BOUNDARY_GAP < boundary or isRight and centerBoundary + BOUNDARY_GAP > boundary then
+		if
+			isLeft and centerBoundary - BOUNDARY_GAP < boundary
+			or isRight and centerBoundary + BOUNDARY_GAP > boundary
+		then
 			boundary = centerBoundary
 		end
 	end
@@ -208,7 +211,10 @@ function Overflow.updateBoundary(alignment)
 	local oppositeBoundary = boundaries[oppositeAlignment]
 	if (isSubmissive and not hasExceededSide) or (isDominant and hasExceededSide) then
 		if oppositeBoundary and not hasExceededSide then
-			if isLeft and oppositeBoundary - topbarPadding < boundary or isRight and oppositeBoundary + topbarPadding > boundary then
+			if
+				isLeft and oppositeBoundary - topbarPadding < boundary
+				or isRight and oppositeBoundary + topbarPadding > boundary
+			then
 				boundary = oppositeBoundary
 			end
 		end
