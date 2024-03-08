@@ -36,7 +36,8 @@ return function(originalMessage: TextChatMessage): Frame
 
 	local TextButton = Instance.new("TextButton")
 	TextButton.Name = "TextButton"
-	TextButton.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+	TextButton.FontFace =
+		Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
 	TextButton.RichText = true
 	TextButton.Text = originalMessage.PrefixText
 	TextButton.TextSize = 14

@@ -3,8 +3,8 @@
 ]]
 
 local Configuration = {
-  GroupId = 10775756,
-  MinimumRank = 6
+	GroupId = 10775756,
+	MinimumRank = 6,
 }
 
 local Players = game:GetService("Players")
@@ -28,15 +28,15 @@ Moderators.Parent = ChatChannels
 
 -- Add players to it
 local function AddPlayerToModerator(player: Player)
-    if player:GetRankInGroup(Configuration.GroupId) >= Configuration.MinimumRank then
-      Moderators:AddUserAsync(player.UserId)
-    end
+	if player:GetRankInGroup(Configuration.GroupId) >= Configuration.MinimumRank then
+		Moderators:AddUserAsync(player.UserId)
+	end
 end
 
 -- Make sure all players get added
 Players.PlayerAdded:Connect(AddPlayerToModerator)
 for _, player: Player in Players:GetPlayers() do
-    task.spawn(AddPlayerToModerator, player)
+	task.spawn(AddPlayerToModerator, player)
 end
 
 -- Initialize server side of ChatChannelService
