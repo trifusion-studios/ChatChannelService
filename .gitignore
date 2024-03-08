@@ -7,3 +7,6 @@
 
 # Have selene update library on its own
 /roblox.yml
+
+# Have sourcemap be updated without git
+/sourcemap.json
