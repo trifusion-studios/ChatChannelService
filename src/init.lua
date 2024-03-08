@@ -6,6 +6,7 @@ local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
+local Teams = game:GetService("Teams")
 local TextChatService = game:GetService("TextChatService")
 local UserInputService = game:GetService("UserInputService")
 
@@ -27,7 +28,7 @@ local InputBar = require(Chat:WaitForChild("InputBar"))
 local Layout = require(Chat:WaitForChild("Layout"))
 local List = require(Chat:WaitForChild("List"))
 local ChatMessage = require(Messages:WaitForChild("ChatMessage"))
-local Icon = require(UI:WaitForChild("Icon"))
+local Icon = RunService:IsClient() and require(UI:WaitForChild("Icon"))
 
 
 local ChatChannelService = {
@@ -50,6 +51,19 @@ local function DebugPrint(...: any)
     end
 end
 
+local function FindPlayerByUserId(userid: number? | string?): Player?
+    if typeof(userid) == "string" then
+        userid = tonumber(userid)
+    end
+    for _, player: Player in Players:GetPlayers() do
+        if player.UserId == userid then
+            return player
+        end
+    end
+
+    return nil
+end
+
 local function CountArray(array: {[any]: any}): number
     local count = 0
     for _ in array do
@@ -58,7 +72,7 @@ local function CountArray(array: {[any]: any}): number
     return count
 end
 
-local function FindTextChannelInChannels(textChannel: TextChannel): (string?, Channel.Channel?)
+local function GetChannelFromTextChannel(textChannel: TextChannel): (string?, Channel.Channel?)
     for name, channel in ChatChannelService.Channels do
         if channel.channel == textChannel then
             return name, channel
@@ -66,6 +80,26 @@ local function FindTextChannelInChannels(textChannel: TextChannel): (string?, Ch
     end
 
     return nil, nil
+end
+
+local function GetChannelFromName(channelName: string): (string?, Channel.Channel?)
+    for name, channel in ChatChannelService.Channels do
+        if name == channelName then
+            return name, channel
+        end
+    end
+
+    return nil, nil
+end
+
+local function GetTeamFromColor(color: BrickColor): Team?
+    for _, team in Teams:GetTeams() do
+        if team.TeamColor == color then
+            return team
+        end
+    end
+
+    return nil
 end
 
 function ChatChannelService:SetupUI()
@@ -94,15 +128,27 @@ function ChatChannelService:SetupUI()
     task.wait(3)
     self.icon = Icon.new()
     self.icon:setEnabled(false)
-    self.icon:set("iconImage", "rbxasset://textures/ui/TopBar/chatOff.png", "deselected")
-    self.icon:set("iconImage", "rbxasset://textures/ui/TopBar/chatOn.png", "selected")
-    self.icon:set("iconBackgroundColor", Color3.fromRGB(0, 0, 0), "selected")
-    self.icon:set("iconBackgroundTransparency", 0.5, "selected")
-    self.icon:set("iconImageColor", Color3.fromRGB(255,255,255), "selected")
-    self.icon:set("iconTextColor", Color3.fromRGB(255,255,255), "selected")
+    -- self.icon:setImage("rbxasset://textures/ui/TopBar/chatOff.png", "deselected")
+    -- self.icon:setImage("rbxasset://textures/ui/TopBar/chatOn.png", "selected")
+    self.icon:setImage("rbxasset://LuaPackages/Packages/_Index/UIBlox/UIBlox/AppImageAtlas/img_set_1x_7.png")
+    self.icon:modifyTheme({
+        {"IconButton", "BackgroundColor3", Color3.new(0, 0, 0), "selected"},
+        {"IconButton", "BackgroundTransparency", 0.5, "selected"},
+        {"IconImage", "ImageColor3", Color3.fromRGB(255,255,255), "selected"},
+        -- {"IconButton", "TextColor", Color3.fromRGB(255,255,255), "selected"},
+        {"IconImage", "ImageRectSize", Vector2.new(36, 36)},
+        {"IconImage", "ImageRectOffset", Vector2.new(342, 76), "selected"},
+        {"IconImage", "ImageRectOffset", Vector2.new(38, 304), "deselected"}
+    })
+    self.icon:setImageScale(1) -- Fixes image from being too small
+    -- self.icon:set("iconBackgroundColor", Color3.fromRGB(0, 0, 0), "selected")
+    -- self.icon:set("iconBackgroundTransparency", 0.5, "selected")
+    -- self.icon:set("iconImageColor", Color3.fromRGB(255,255,255), "selected")
+    -- self.icon:set("iconTextColor", Color3.fromRGB(255,255,255), "selected")
 
     self.ui = Instance.new("ScreenGui")
     self.ui.Name = "ChatChannelService_UI"
+    self.ui.ResetOnSpawn = false
     self.ui.Enabled = false
 
     self.root = Layout()
@@ -113,9 +159,10 @@ function ChatChannelService:SetupUI()
     self.input.Parent = self.root
     self.window.Parent = self.root
 
-    self.currentChannel = nil :: TextChannel?
+    self.currentChannel = nil :: Channel.Channel?
     self.currentChannelChanged = Instance.new("BindableEvent")
     self.canSend = false
+    self.isGuest = (Players.LocalPlayer.UserId < 0 and RunService:IsStudio() == false)
 
     self.channelList, self.channelScroll = ChannelList()
     self.channelList.Parent = self.root
@@ -127,7 +174,7 @@ function ChatChannelService:SetupUI()
         if sending == true or self.canSend == false then
             return
         else
-            sending = false
+            sending = true
         end
 
         -- Send message to current channel
@@ -144,6 +191,9 @@ function ChatChannelService:SetupUI()
         self.textbox.PlaceholderText = "To chat click here or press / key"
         self.textbox.TextTransparency = 0.5
         self.textbox.Text = ""
+
+        -- Allow send again
+        sending = false
     end
 
     -- Connect events
@@ -160,12 +210,12 @@ function ChatChannelService:SetupUI()
             return
         end
 
-        if self.icon:getToggleState() == "deselected" then
+        if self.icon.activeState == "Deselected" then
             self.icon:notify()
         end
 
         DebugPrint(`Received message! Current status: {textChatMessage.Status}`)
-        local _, channel = FindTextChannelInChannels(textChatMessage.TextChannel)
+        local _, channel = GetChannelFromTextChannel(textChatMessage.TextChannel)
         if channel then
             channel.OnMessage()
             ChatChannelService.ChannelHistory:AddEntry(textChatMessage)
@@ -210,7 +260,13 @@ function ChatChannelService:SetupUI()
     self.currentChannelChanged.Event:Connect(function(newChannel: Channel.Channel)
 		local source = newChannel.channel:FindFirstChild(Players.LocalPlayer.Name) or {CanSend = false} :: TextSource | {CanSend: boolean}
 
-        if source.CanSend == false then
+        if self.isGuest == true then
+            self.canSend = false
+            self.textbox.TextEditable = false
+            self.textbox.PlaceholderText = "Create a free account to get access to chat permissions!"
+            self.textbox.Text = ""
+            self.textbox:ReleaseFocus()
+        elseif source.CanSend == false then
             self.canSend = false
             self.textbox.TextEditable = false
             self.textbox.PlaceholderText = "You cannot send message in this channel"
@@ -257,17 +313,39 @@ function ChatChannelService:AddChannel(channel: TextChannel, customName: string?
     end)
 
     -- Add message if channel is active
-    ChatChannelService.ChannelHistory:OnEntryAdded(function(message: TextChatMessage)
-        if message.TextChannel == channel and self.currentChannel.channel == channel then
+    local channelChangedConnection: RBXScriptConnection = nil
+    channelChangedConnection = ChatChannelService.ChannelHistory:ChannelChanged(function(message: TextChatMessage | "CLEARED" | "REMOVED", changedChannel: TextChannel?)
+        if typeof(message) == "Instance" and message.TextChannel == channel and self.currentChannel.channel == channel then
             local newMessage = ChatMessage(message)
             newMessage.LayoutOrder = message.Timestamp.UnixTimestamp
             newMessage.Parent = self.list
+        elseif message == "CLEARED" and self.currentChannel.channel == channel then
+            -- Use SwitchChannel to reset ui as no message means channel got reset
+            ChatChannelService:SwitchChannel(self.currentChannel)
+        elseif message == "REMOVED" and changedChannel == channel then
+            -- Disconnect to prevent memory leaks
+            channelChangedConnection:Disconnect()
         end
     end)
 
     DebugPrint("Channel has been successfully added")
     
     return newChannel
+end
+
+function ChatChannelService:RemoveChannel(channel: Channel.Channel)
+    DebugPrint(`Removing channel: {channel.name}`)
+
+    -- Prevent original channel from being lost
+    local originalInstance = channel.channel
+    local originalName = channel.name
+
+    -- First remove channel from index
+    ChatChannelService.Channels[originalName].Destroy()
+    ChatChannelService.Channels[originalName] = nil
+
+    -- Clear history
+    ChatChannelService.ChannelHistory:RemoveChannel(originalInstance)
 end
 
 function ChatChannelService:SwitchChannel(channel: Channel.Channel)
@@ -322,7 +400,6 @@ function ChatChannelService:Setup(): ()
         ChatChannelService:AddChannel(TextChatService:WaitForChild("TextChannels"):WaitForChild("RBXGeneral"), "General")
         ChatChannelService:AddChannel(TextChatService:WaitForChild("TextChannels"):WaitForChild("RBXSystem"), "System")
 
-        -- TODO: Roblox whisper commands adds channels, instead of one loop add connection too like custom channels
         for _, object: TextChannel in TextChatService:WaitForChild("TextChannels"):GetChildren() do
             if object:IsA("TextChannel") == false or object.Name == "RBXGeneral" or object.Name == "RBXSystem" then
                 -- Prevent other instances from being setup
@@ -331,6 +408,19 @@ function ChatChannelService:Setup(): ()
 
             -- Remove RBX part
             local newName = object.Name:gsub("RBX", "")
+
+            -- Make sure channel isn't team
+            if newName:match("Team") then
+                local teamColor = newName:gsub("Team", ""):split()[1]
+                local brickColor = BrickColor.new(teamColor)
+                local possibleTeam = GetTeamFromColor(brickColor)
+
+                if possibleTeam then
+                    newName = possibleTeam.Name
+                else
+                    newName = "Team" -- Failsafe in case brick color fails
+                end
+            end
 
             -- check if player is in the channel
             local source = object:FindFirstChild(Players.LocalPlayer.Name) and object:WaitForChild(Players.LocalPlayer.Name)
@@ -342,6 +432,84 @@ function ChatChannelService:Setup(): ()
             end
         end
 
+        -- List to added connection, for channels like (teams/whisper)
+        TextChatService:WaitForChild("TextChannels").ChildAdded:Connect(function(object: TextChannel)
+            if object:IsA("TextChannel") == false or object.Name == "RBXGeneral" or object.Name == "RBXSystem" then
+                -- return other instances from being setup
+                return
+            end
+
+            -- Remove RBX part
+            local newName = object.Name:gsub("RBX", "")
+
+            -- Check if added channel is whisper
+            if newName:match("Whisper:") then
+                local split = newName:gsub("Whisper:", ""):split("_")
+                local possibleTarget = FindPlayerByUserId(split[2])
+
+                -- Prevent target from being localplayer
+                if possibleTarget == Players.LocalPlayer then
+                    possibleTarget = FindPlayerByUserId(split[1])
+                    newName = possibleTarget and possibleTarget.Name or "Whisper"
+                elseif possibleTarget ~= Players.LocalPlayer then
+                    newName = possibleTarget.Name
+                end
+
+                DebugPrint(`Creating whisper channel for target: {newName}`)
+            elseif newName:match("Team") then
+                local teamColor = newName:gsub("Team", ""):split()[1]
+                local brickColor = BrickColor.new(teamColor)
+                local possibleTeam = GetTeamFromColor(brickColor)
+
+                if possibleTeam then
+                    newName = possibleTeam.Name
+                else
+                    newName = "Team" -- Failsafe in case brick color fails
+                end
+            end
+
+            DebugPrint(`Checking if player has source in channel...`)
+
+            -- check if player is in the channel
+            local source = object:FindFirstChild(Players.LocalPlayer.Name) and object:WaitForChild(Players.LocalPlayer.Name)
+            if source then
+                DebugPrint("SOURCE EXISTS")
+                ChatChannelService:AddChannel(object, newName)
+            end
+            
+            DebugPrint("PAST ADDING CHANNEL")
+
+            -- Make sure when added, player can chat
+            object.ChildAdded:Connect(function(child)
+                DebugPrint("CHILD ADDED")
+                if child:IsA("TextSource") == false then
+                    -- Prevent other instances from triggering channels
+                    return
+                end
+
+                if child.Name == Players.LocalPlayer.Name then
+                    ChatChannelService:AddChannel(object, newName)
+                end
+            end)
+
+            -- Make sure when removed, player doesn't see the channel anymore
+            object.ChildRemoved:Connect(function(child)
+                DebugPrint("CHILD REMOVED")
+                if child:IsA("TextSource") == false then
+                    -- Prevent other instances from triggering channels
+                    return
+                end
+
+                if child.Name == Players.LocalPlayer.Name then
+                    local _, channelExists = GetChannelFromTextChannel(object)
+
+                    -- Prevent nil from beign removed
+                    if channelExists then
+                        ChatChannelService:RemoveChannel(channelExists)
+                    end
+                end
+            end)
+        end)
 
         -- Select default channel as current
         ChatChannelService:SwitchChannel(ChatChannelService.Channels["General"])
@@ -390,6 +558,22 @@ function ChatChannelService:Setup(): ()
                 end)
 
                 return
+            end
+        end)
+
+        -- Connect clear channel command
+        TextChatService:WaitForChild("TextChatCommands"):WaitForChild("RBXClearCommand").Triggered:Connect(function()
+            ChatChannelService.ChannelHistory:ClearChannelHistory(self.currentChannel.channel)
+        end)
+
+        -- Connect team channel command
+        TextChatService:WaitForChild("TextChatCommands"):WaitForChild("RBXTeamCommand").Triggered:Connect(function()
+            for _, team in Teams:GetTeams() do
+                if Players.LocalPlayer.Team == team then
+                    local _, foundChannel = GetChannelFromName(team.Name)
+
+                    ChatChannelService:SwitchChannel(foundChannel)
+                end
             end
         end)
 
