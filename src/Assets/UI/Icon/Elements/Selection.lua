@@ -1,4 +1,4 @@
-return function(Icon)
+return function(_)
 	-- Credit to lolmansReturn and Canary Software for
 	-- retrieving these values
 	local selectionContainer = Instance.new("Frame")

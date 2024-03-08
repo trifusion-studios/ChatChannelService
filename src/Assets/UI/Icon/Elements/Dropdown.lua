@@ -76,14 +76,14 @@ return function(icon)
 	end)
 	icon.dropdownSet:Connect(function(arrayOfIcons)
 		-- Destroy any previous icons
-		for i, otherIconUID in pairs(icon.dropdownIcons) do
+		for _, otherIconUID in pairs(icon.dropdownIcons) do
 			local otherIcon = Icon.getIconByUID(otherIconUID)
 			otherIcon:destroy()
 		end
 		-- Add new icons
-		local totalNewIcons = #arrayOfIcons
+		local _ = #arrayOfIcons
 		if type(arrayOfIcons) == "table" then
-			for i, otherIcon in pairs(arrayOfIcons) do
+			for _, otherIcon in pairs(arrayOfIcons) do
 				otherIcon:joinDropdown(icon)
 			end
 		end

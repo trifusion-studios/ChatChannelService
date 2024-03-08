@@ -3,7 +3,7 @@
 -- This contains the core components of the icon such as the button, image, label and notice. It's
 -- also responsible for handling the automatic resizing of the widget (based upon image visibility and text length)
 
-return function(icon, Icon)
+return function(icon, _)
 	local widget = Instance.new("Frame")
 	widget:SetAttribute("WidgetUID", icon.UID)
 	widget.Name = "Widget"
@@ -228,6 +228,7 @@ return function(icon, Icon)
 				paddingRight.Visible = not usingIndicator
 				alignment = Enum.HorizontalAlignment.Left
 			end
+			alignment = alignment
 			button.Size = buttonSize
 
 			local function getItemWidth(item)
@@ -341,7 +342,7 @@ return function(icon, Icon)
 			handleLabelAndImageChanges()
 			if firstTimeSettingFontFace then
 				firstTimeSettingFontFace = false
-				for i = 1, 10 do
+				for _ = 1, 10 do
 					task.wait(1)
 					handleLabelAndImageChanges()
 				end

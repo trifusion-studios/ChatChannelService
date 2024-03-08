@@ -57,7 +57,7 @@ function Overflow.updateAvailableIcons(alignment)
 	-- We only track items that are directly on the topbar (i.e. not within a parent icon)
 	local ourTotal = 0
 	local holder = holders[alignment]
-	local holderUIList = holder.UIListLayout
+	local _ = holder.UIListLayout
 	local ourOrderedIcons = {}
 	for _, icon in pairs(iconsDict) do
 		local parentUID = icon.parentIconUID
@@ -164,9 +164,7 @@ function Overflow.updateBoundary(alignment)
 		local nearestXPos = nearestCenterIcon.widget.AbsolutePosition.X
 		local centerBoundary = (isLeft and nearestXPos)
 			or nearestXPos + nearestCenterIcon.widget.AbsoluteSize.X + topbarInset
-		if isLeft and centerBoundary - BOUNDARY_GAP < boundary then
-			boundary = centerBoundary
-		elseif isRight and centerBoundary + BOUNDARY_GAP > boundary then
+		if isLeft and centerBoundary - BOUNDARY_GAP < boundary or isRight and centerBoundary + BOUNDARY_GAP > boundary then
 			boundary = centerBoundary
 		end
 	end
@@ -187,6 +185,7 @@ function Overflow.updateBoundary(alignment)
 		local defaultIconWidth = Themes.getThemeValue(stateGroup, "Widget", "MinimumWidth") or 0
 		local requiredSideGap = (defaultIconWidth * 3) + (BOUNDARY_GAP * 2)
 		local viewportWidth = currentCamera.ViewportSize.X
+		-- selene: allow(empty_if)
 		if isRight and boundary < requiredSideGap then
 			-- FOR THIS, CONSIDER ICONS JOINING A SOLE SIDE OF THE SCREEN
 			--boundary = requiredSideGap
@@ -209,9 +208,7 @@ function Overflow.updateBoundary(alignment)
 	local oppositeBoundary = boundaries[oppositeAlignment]
 	if (isSubmissive and not hasExceededSide) or (isDominant and hasExceededSide) then
 		if oppositeBoundary and not hasExceededSide then
-			if isLeft and oppositeBoundary - topbarPadding < boundary then
-				boundary = oppositeBoundary
-			elseif isRight and oppositeBoundary + topbarPadding > boundary then
+			if isLeft and oppositeBoundary - topbarPadding < boundary or isRight and oppositeBoundary + topbarPadding > boundary then
 				boundary = oppositeBoundary
 			end
 		end
@@ -249,6 +246,7 @@ function Overflow.updateBoundary(alignment)
 		local holderIncrement = (isLeft and sizeX) or -sizeX
 		local isOverflow = overflowIconUIDs[icon.UID]
 		absoluteX += holderIncrement
+		-- selene: allow(empty_if)
 		if isRight then
 			--print("absoluteX =", boundary, icon.widget.Name, absoluteX, icon.widget.AbsolutePosition.X)
 		end

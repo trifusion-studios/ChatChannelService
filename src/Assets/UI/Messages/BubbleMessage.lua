@@ -1,5 +1,5 @@
 return function(originalMessage: TextChatMessage)
-	local bubbleProperties = originalMessage.BubbleChatMessageProperties
+	local _ = originalMessage.BubbleChatMessageProperties
 
 	-- Add bubble chat support
 end

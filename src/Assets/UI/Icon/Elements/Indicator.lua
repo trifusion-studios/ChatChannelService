@@ -1,4 +1,4 @@
-return function(icon, Icon)
+return function(icon, _)
 	local widget = icon.widget
 	local contents = icon:getInstance("Contents")
 	local indicator = Instance.new("Frame")

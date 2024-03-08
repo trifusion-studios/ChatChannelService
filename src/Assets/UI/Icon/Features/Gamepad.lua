@@ -35,10 +35,10 @@ function Gamepad.start(incomingIcon)
 
 		-- This enables users to instantly open up their last selected icon
 		local previousHighlightedIcon
-		local iconDisplayingHighlightKey
+		local _
 		local usedIndicatorOnce = false
 		local usedBOnce = false
-		local Utility = require(script.Parent.Parent.Utility)
+		local _ = require(script.Parent.Parent.Utility)
 		local Selection = require(script.Parent.Parent.Elements.Selection)
 		local function updateSelectedObject()
 			local icon = getIconFromSelectedObject()
@@ -72,6 +72,8 @@ function Gamepad.start(incomingIcon)
 				if not previousHighlightedIcon then
 					previousHighlightedIcon = Gamepad.getIconToHighlight()
 				end
+
+				-- selene: allow(empty_if)
 				if newIndicator == Icon.highlightKey then
 					-- We only display the highlightKey once to show
 					-- the user how to highlight the topbar icon
@@ -101,7 +103,7 @@ function Gamepad.start(incomingIcon)
 		-- This allows for easy highlighting of the topbar when the
 		-- when ``Icon.highlightKey`` (i.e. DPadUp) is pressed.
 		-- If you'd like to disable, do ``Icon.highlightKey = false``
-		UserInputService.InputBegan:Connect(function(input, touchingAnObject)
+		UserInputService.InputBegan:Connect(function(input, _)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				-- Sometimes the Roblox gamepad glitches when combined with a cursor
 				-- This fixes that by unhighlighting if the cursor is pressed down
@@ -156,7 +158,7 @@ function Gamepad.registerButton(buttonInstance)
 	-- when selected, focuses in on the selected icon and hops
 	-- between other nearby icons simply by toggling the joystick
 	local inputBegan = false
-	buttonInstance.InputBegan:Connect(function(input)
+	buttonInstance.InputBegan:Connect(function(_)
 		-- Two wait frames required to ensure inputBegan is detected within
 		-- UserInputService.InputBegan. We do this because object.InputBegan
 		-- does not return the correct input objects (unlike the service)
