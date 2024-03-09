@@ -12,6 +12,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Loaded = script:WaitForChild("Loaded") :: BoolValue
 local Assets = script:WaitForChild("Assets")
+local Modules = script:WaitForChild("Modules")
 local Utils = Assets:WaitForChild("Utils")
 local UI = Assets:WaitForChild("UI")
 local Channels = UI:WaitForChild("Channels")
@@ -27,7 +28,7 @@ local InputBar = require(Chat:WaitForChild("InputBar"))
 local Layout = require(Chat:WaitForChild("Layout"))
 local List = require(Chat:WaitForChild("List"))
 local ChatMessage = require(Messages:WaitForChild("ChatMessage"))
-local Icon = RunService:IsClient() and require(UI:WaitForChild("Icon"))
+local Icon = RunService:IsClient() and require(Modules:WaitForChild("Icon"))
 
 local ChatChannelService = {
 	Debug = true,

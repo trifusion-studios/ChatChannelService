@@ -1,22 +1,14 @@
 {
-  "name": "ChatChannelService",
-  "tree": {
-    "$className": "DataModel",
-
-    "ReplicatedStorage": {
-      "ChatChannelService": {
-        "$path": "src/"
-      }
-    },
-
-    "ServerScriptService": {
-      "$path": "demo/server"
-    },
-
-    "StarterPlayer": {
-      "StarterPlayerScripts": {
-        "$path": "demo/client"
-      }
+    "name": "ChatChannelService",
+    "tree": {
+        "$path": "./src",
+  
+        "Modules": {
+          "$className": "Folder",
+          
+          "Icon": {
+            "$path": "./modules/TopbarPlus/src"
+          }
+        }
     }
   }
-}
