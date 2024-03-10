@@ -556,16 +556,20 @@ function ChatChannelService:Setup(): ()
 				and object:WaitForChild(Players.LocalPlayer.Name)
 			if source then
 				ChatChannelService:AddChannel(object)
-			else
-				-- If player isn't in this channel, setup connection to wait for them to be added
-				object.ChildAdded:Connect(function(newObject)
-					if newObject:IsA("TextSource") and newObject.UserId == Players.LocalPlayer.UserId then
-						ChatChannelService:AddChannel(object)
-					end
-				end)
-
-				return
 			end
+
+			-- Connect events
+			object.ChildAdded:Connect(function(newObject: TextSource)
+				if newObject:IsA("TextSource") and newObject.UserId == Players.LocalPlayer.UserId then
+					ChatChannelService:AddChannel(object)
+				end
+			end)
+
+			object.ChildRemoved:Connect(function(oldObject: TextSource)
+				if oldObject:IsA("TextSource") and oldObject.UserId == Players.LocalPlayer.UserId then
+					ChatChannelService:RemoveChannel(object)
+				end
+			end)
 		end)
 
 		-- Connect clear channel command
@@ -587,19 +591,17 @@ function ChatChannelService:Setup(): ()
 		self.icon:setEnabled(true)
 		DebugPrint("Fully loaded channels! Chat icon has been enabled")
 	else
-		DebugPrint("Setting up channels...")
+		DebugPrint("Setting up custom channel and commands folder...")
 
-		-- for _, object: TextChannel in CollectionService:GetTagged(ChatChannelService.ChannelTag) do
-		--     if object:IsA("TextChannel") == false then
-		--         -- Prevent other instances from being setup
-		--         return
-		--     end
+		local ChatChannels = Instance.new("Folder")
+		ChatChannels.Name = "ChatChannels"
+		ChatChannels.Parent = TextChatService
 
-		--     -- Setup channel
-		--     ChatChannelService.Channels[object] = object
-		-- end
+		local ChatCommands = Instance.new("Folder")
+		ChatCommands.Name = "ChatCommands"
+		ChatChannels.Parent = ChatCommands
 
-		DebugPrint("Channels ready for client")
+		DebugPrint("ChatChannelService ready for client!")
 		Loaded.Value = true
 	end
 end
