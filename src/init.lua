@@ -130,28 +130,18 @@ function ChatChannelService:SetupUI()
 		error("[ChatChannelService] Failed to disable the default chat, channels are now disabled on this client.")
 	end
 
-	-- Added a small wait to prevent settings from being changed too early
-	-- TODO: Fix Icon overriding theme on already active icons
-	task.wait(3)
 	self.icon = Icon.new()
 	self.icon:setEnabled(false)
-	-- self.icon:setImage("rbxasset://textures/ui/TopBar/chatOff.png", "deselected")
-	-- self.icon:setImage("rbxasset://textures/ui/TopBar/chatOn.png", "selected")
 	self.icon:setImage("rbxasset://LuaPackages/Packages/_Index/UIBlox/UIBlox/AppImageAtlas/img_set_1x_7.png")
 	self.icon:modifyTheme({
 		{ "IconButton", "BackgroundColor3", Color3.new(0, 0, 0), "selected" },
 		{ "IconButton", "BackgroundTransparency", 0.5, "selected" },
 		{ "IconImage", "ImageColor3", Color3.fromRGB(255, 255, 255), "selected" },
-		-- {"IconButton", "TextColor", Color3.fromRGB(255,255,255), "selected"},
 		{ "IconImage", "ImageRectSize", Vector2.new(36, 36) },
 		{ "IconImage", "ImageRectOffset", Vector2.new(342, 76), "selected" },
 		{ "IconImage", "ImageRectOffset", Vector2.new(38, 304), "deselected" },
 	})
 	self.icon:setImageScale(1) -- Fixes image from being too small
-	-- self.icon:set("iconBackgroundColor", Color3.fromRGB(0, 0, 0), "selected")
-	-- self.icon:set("iconBackgroundTransparency", 0.5, "selected")
-	-- self.icon:set("iconImageColor", Color3.fromRGB(255,255,255), "selected")
-	-- self.icon:set("iconTextColor", Color3.fromRGB(255,255,255), "selected")
 
 	self.ui = Instance.new("ScreenGui")
 	self.ui.Name = "ChatChannelService_UI"
