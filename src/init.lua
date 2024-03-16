@@ -29,12 +29,14 @@ local Layout = require(Chat:WaitForChild("Layout"))
 local List = require(Chat:WaitForChild("List"))
 local ChatMessage = require(Messages:WaitForChild("ChatMessage"))
 local Icon = RunService:IsClient() and require(Modules:WaitForChild("Icon"))
+local Types = require(script:WaitForChild("Types"))
 
 local ChatChannelService = {
 	Debug = true,
 	Channels = {} :: { [string]: Channel.Channel },
+	Commands = {},
 	ChannelHistory = History.new(),
-}
+} :: Types.ChatChannelService
 
 local BlockChatMessageStatus = {
 	"Unknown",
