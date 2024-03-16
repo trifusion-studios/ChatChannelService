@@ -23,13 +23,14 @@ local Channel = require(Channels:WaitForChild("Channel"))
 local ChannelList = require(Channels:WaitForChild("ChannelList"))
 local SafePcall = require(Utils:WaitForChild("SafePcall"))
 local History = require(Utils:WaitForChild("History"))
+local Types = require(Utils:WaitForChild("Types"))
 
 local InputBar = require(Chat:WaitForChild("InputBar"))
 local Layout = require(Chat:WaitForChild("Layout"))
 local List = require(Chat:WaitForChild("List"))
 local ChatMessage = require(Messages:WaitForChild("ChatMessage"))
 local Icon = RunService:IsClient() and require(Modules:WaitForChild("Icon"))
-local Types = require(script:WaitForChild("Types"))
+
 
 local ChatChannelService = {
 	Debug = true,
@@ -603,7 +604,7 @@ function ChatChannelService:Setup(): ()
 		ChatCommands.Name = "ChatCommands"
 		ChatChannels.Parent = ChatCommands
 
-		DebugPrint("ChatChannelService ready for client!")
+		DebugPrint("ChatChannelService is ready for client!")
 		Loaded.Value = true
 	end
 end

@@ -1,4 +1,4 @@
-local History = require(script.Parent:WaitForChild("Assets"):WaitForChild("Utils"):WaitForChild("History"))
+local History = require(script.Parent:WaitForChild("History"))
 
 export type Channel = {
 	name: string,
