@@ -140,7 +140,7 @@ local function ClearAutoCompleteFrame(listFrame: Frame, mainWindow: Frame): ()
 	mainWindow.Visible = false
 end
 
-function ChatChannelService:SetupUI()
+function ChatChannelService:SetupUI(): boolean
 	if RunService:IsServer() == true then
 		-- Prevent server making icons
 		DebugPrint("Tried to setup UI on server")
@@ -558,16 +558,15 @@ function ChatChannelService:Setup(): ()
 			-- Remove RBX part
 			local newName = object.Name:gsub("RBX", "")
 
-			-- Make sure channel isn't team
-			if newName:match("Team") then
-				local teamColor = newName:gsub("Team", ""):split()[1]
-				local brickColor = BrickColor.new(teamColor)
-				local possibleTeam = GetTeamFromColor(brickColor)
-
-				if possibleTeam then
-					newName = possibleTeam.Name
-				else
-					newName = "Team" -- Failsafe in case brick color fails
+			-- Check if any overrides match channel name
+			print("Showing overrides!")
+			print("Overrides:", ChannelOverrides)
+			for possibleMatch, override in ChannelOverrides do
+				print(possibleMatch)
+				if newName:match(possibleMatch) then
+					print("match yes!")
+					newName = override(self, newName)
+					break
 				end
 			end
 
@@ -592,29 +591,15 @@ function ChatChannelService:Setup(): ()
 			-- Remove RBX part
 			local newName = object.Name:gsub("RBX", "")
 
-			-- Check if added channel is whisper
-			if newName:match("Whisper:") then
-				local split = newName:gsub("Whisper:", ""):split("_")
-				local possibleTarget = FindPlayerByUserId(split[2])
-
-				-- Prevent target from being localplayer
-				if possibleTarget == Players.LocalPlayer then
-					possibleTarget = FindPlayerByUserId(split[1])
-					newName = possibleTarget and possibleTarget.Name or "Whisper"
-				elseif possibleTarget ~= Players.LocalPlayer then
-					newName = possibleTarget.Name
-				end
-
-				DebugPrint(`Creating whisper channel for target: {newName}`)
-			elseif newName:match("Team") then
-				local teamColor = newName:gsub("Team", ""):split()[1]
-				local brickColor = BrickColor.new(teamColor)
-				local possibleTeam = GetTeamFromColor(brickColor)
-
-				if possibleTeam then
-					newName = possibleTeam.Name
-				else
-					newName = "Team" -- Failsafe in case brick color fails
+			-- Check if any overrides match channel name
+			print("Showing overrides!")
+			print("Overrides:", ChannelOverrides)
+			for possibleMatch, override in ChannelOverrides do
+				print(possibleMatch)
+				if newName:match(possibleMatch) then
+					print("match yes!")
+					newName = override(self, newName)
+					break
 				end
 			end
 
@@ -667,6 +652,7 @@ function ChatChannelService:Setup(): ()
 
 		DebugPrint("Default Roblox channels have been set up, loading custom channels...")
 
+		-- Load through already existing custom channels
 		for _, object: TextChannel in TextChatService:WaitForChild("ChatChannels"):GetChildren() do
 			if object:IsA("TextChannel") == false then
 				-- Prevent other instances from being setup
