@@ -31,7 +31,7 @@ return function()
 
 	local SizeConstraint1 = Instance.new("UISizeConstraint")
 	SizeConstraint1.Name = "uiSizeConstraint"
-	SizeConstraint1.MaxSize = Vector2.new(475, math.huge)
+	SizeConstraint1.MaxSize = Vector2.new(475, 200)
 	SizeConstraint1.Parent = Layout
 
 	local Border1 = Instance.new("ImageLabel")

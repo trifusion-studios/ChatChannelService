@@ -1,4 +1,4 @@
-return function(command: string, layoutOrder: number): (Frame, TextButton)
+return function(command: string, layoutOrder: number, clickCallback: () -> ()): (Frame, TextButton)
 	local CommandFrame = Instance.new("Frame")
 	CommandFrame.Name = command
 	CommandFrame.AutomaticSize = Enum.AutomaticSize.Y
@@ -11,7 +11,7 @@ return function(command: string, layoutOrder: number): (Frame, TextButton)
 	Divider.Name = "Divider"
 	Divider.AnchorPoint = Vector2.new(0, 1)
 	Divider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	Divider.BackgroundTransparency = 1
+	Divider.BackgroundTransparency = 0.8
 	Divider.BorderSizePixel = 0
 	Divider.Position = UDim2.fromScale(0, 1)
 	Divider.Size = UDim2.new(1, 0, 0, 1)
@@ -21,10 +21,12 @@ return function(command: string, layoutOrder: number): (Frame, TextButton)
 	local TextLabelButton = Instance.new("TextButton")
 	TextLabelButton.Name = "TextLabelButton"
 	TextLabelButton.Text = ""
-	TextLabelButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	TextLabelButton.BackgroundColor3 = Color3.fromRGB(163, 162, 165)
 	TextLabelButton.BackgroundTransparency = 1
 	TextLabelButton.Size = UDim2.new(1, 0, 1, -1)
 	TextLabelButton.ZIndex = 3
+
+	TextLabelButton.Activated:Connect(clickCallback)
 
 	local UIPadding = Instance.new("UIPadding")
 	UIPadding.Name = "UIPadding"
@@ -49,7 +51,6 @@ return function(command: string, layoutOrder: number): (Frame, TextButton)
 	TextLabel.Text = command
 	TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 	TextLabel.TextSize = 14
-	TextLabel.TextTransparency = 1
 	TextLabel.TextWrapped = true
 	TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 	TextLabel.TextYAlignment = Enum.TextYAlignment.Top

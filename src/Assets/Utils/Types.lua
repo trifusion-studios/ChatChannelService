@@ -22,22 +22,19 @@ export type Command = {
 
 	PrimaryAlias: string,
 	SecondaryAlias: string,
-
-	OnTriggered: (
-		callback: (self: ChatChannelService, originTextSource: TextSource, unfilteredText: string) -> ()
-	) -> (),
 }
 
 export type ChatChannelService = {
 	Debug: boolean,
 	Channels: { [string]: Channel },
-	Commands: {},
+	Commands: { [string]: Command },
 	ChannelHistory: History.HistoryObject,
 
 	SetupUI: (self: ChatChannelService) -> (),
 	AddChannel: (self: ChatChannelService, channel: TextChannel, customName: string?) -> Channel,
 	RemoveChannel: (self: ChatChannelService, channel: TextChannel) -> (),
 	SwitchChannel: (self: ChatChannelService, channel: TextChannel) -> (),
+	AddCommand: (self: ChatChannelService, Command: TextChatCommand) -> (),
 
 	Setup: (self: ChatChannelService) -> (),
 }

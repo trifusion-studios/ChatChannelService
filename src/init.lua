@@ -15,6 +15,7 @@ local Assets = script:WaitForChild("Assets")
 local Modules = script:WaitForChild("Modules")
 local Utils = Assets:WaitForChild("Utils")
 local UI = Assets:WaitForChild("UI")
+local Overrides = Assets:WaitForChild("Overrides")
 local Channels = UI:WaitForChild("Channels")
 local Chat = UI:WaitForChild("Chat")
 local Messages = UI:WaitForChild("Messages")
@@ -24,18 +25,21 @@ local ChannelList = require(Channels:WaitForChild("ChannelList"))
 local SafePcall = require(Utils:WaitForChild("SafePcall"))
 local History = require(Utils:WaitForChild("History"))
 local Types = require(Utils:WaitForChild("Types"))
+local AutoComplete = require(Utils:WaitForChild("AutoComplete"))
+local ChannelOverrides = require(Overrides:WaitForChild("Channels"))
+local CommandOverrides = require(Overrides:WaitForChild("Commands"))
 
 local InputBar = require(Chat:WaitForChild("InputBar"))
 local Layout = require(Chat:WaitForChild("Layout"))
 local List = require(Chat:WaitForChild("List"))
+local Command = require(Chat:WaitForChild("Command"))
 local ChatMessage = require(Messages:WaitForChild("ChatMessage"))
 local Icon = RunService:IsClient() and require(Modules:WaitForChild("Icon"))
-
 
 local ChatChannelService = {
 	Debug = true,
 	Channels = {} :: { [string]: Channel.Channel },
-	Commands = {},
+	Commands = {} :: { [string]: Types.Command },
 	ChannelHistory = History.new(),
 } :: Types.ChatChannelService
 
@@ -112,6 +116,30 @@ local function GetTeamFromColor(color: BrickColor): Team?
 	return nil
 end
 
+local function GetAliasFromCommands(): { string }
+	local converted = {}
+
+	for _, command: Types.Command in ChatChannelService.Commands do
+		table.insert(converted, command.PrimaryAlias)
+	end
+
+	return converted
+end
+
+local function ClearAutoCompleteFrame(listFrame: Frame, mainWindow: Frame): ()
+	for _, child: Instance in listFrame:GetChildren() do
+		-- Prevent UI Layout from getting deleted
+		if child:IsA("UIListLayout") then
+			continue
+		end
+
+		child:Destroy()
+	end
+
+	-- Hide frame again
+	mainWindow.Visible = false
+end
+
 function ChatChannelService:SetupUI()
 	if RunService:IsServer() == true then
 		-- Prevent server making icons
@@ -153,7 +181,7 @@ function ChatChannelService:SetupUI()
 
 	self.root = Layout()
 	self.window, self.list = List()
-	self.input, self.textbox, self.send = InputBar()
+	self.input, self.textbox, self.send, self.commandList, self.autocomplete, self.commandScroll = InputBar()
 
 	self.root.Parent = self.ui
 	self.input.Parent = self.root
@@ -218,17 +246,57 @@ function ChatChannelService:SetupUI()
 		end
 	end)
 
+	-- Setup autocomplete event
+	self.autoCompleteList = {
+		selected = "",
+		index = 2,
+		list = {} :: { string },
+		event = Instance.new("BindableEvent"),
+	}
+
 	UserInputService.InputEnded:Connect(function(input: InputObject, gameProcessedEvent: boolean)
-		if gameProcessedEvent or input.KeyCode ~= Enum.KeyCode.Slash or self.canSend == false then
-			-- Prevent accidental activate when typing or wrong input
+		if self.canSend == false then
+			-- Don't select anything when not active
 			return
 		end
 
-		self.icon:select()
-		self.textbox:CaptureFocus()
+		if gameProcessedEvent == false and input.KeyCode == Enum.KeyCode.Slash then
+			self.icon:select()
+			self.textbox:CaptureFocus()
+			return
+		end
+
+		if self.isFocused == true then
+			if
+				input.KeyCode == Enum.KeyCode.Up
+				and self.autoCompleteList.index > 1
+				and self.autoCompleteList.index <= #self.autoCompleteList.list
+			then
+				self.autoCompleteList.index = self.autoCompleteList.index - 1
+				self.autoCompleteList.event:Fire(self.autoCompleteList.index)
+				self.commandScroll.CanvasPosition = Vector2.new(0, (self.autoCompleteList.index - 1) * 30)
+			elseif
+				input.KeyCode == Enum.KeyCode.Down
+				and self.autoCompleteList.index >= 1
+				and self.autoCompleteList.index < #self.autoCompleteList.list
+			then
+				self.autoCompleteList.index = self.autoCompleteList.index + 1
+				self.autoCompleteList.event:Fire(self.autoCompleteList.index)
+				self.commandScroll.CanvasPosition = Vector2.new(0, (self.autoCompleteList.index - 1) * 30)
+			elseif input.KeyCode == Enum.KeyCode.Tab then
+				self.textbox.Text = `{self.autoCompleteList.selected} `
+				self.textbox.CursorPosition = self.textbox.Text:len() + 1
+			end
+		end
+	end)
+
+	self.textbox.Focused:Connect(function()
+		self.isFocused = true
 	end)
 
 	self.textbox.FocusLost:Connect(function(enterPressed: boolean)
+		self.isFocused = false
+
 		if enterPressed and #self.textbox.Text > 0 then
 			-- Send the text to server
 			SendCurrentText()
@@ -246,16 +314,65 @@ function ChatChannelService:SetupUI()
 				self.send.SendIcon.ImageTransparency = 0.5
 				self.textbox.TextTransparency = 0.5
 			end
+
+			-- Show autocomplete
+			ClearAutoCompleteFrame(self.commandList, self.autocomplete)
+			self.autoCompleteList.list = {}
+			self.autoCompleteList.index = 1
+
+			for index, commandName: string in AutoComplete(GetAliasFromCommands(), self.textbox.Text) do
+				-- Prevents command list from not being visible
+				self.autocomplete.Visible = true
+
+				-- Prevent showing hidden/disabled commands
+				if
+					ChatChannelService.Commands[commandName].AutocompleteVisible == false
+					or ChatChannelService.Commands[commandName].Enabled == false
+				then
+					continue
+				end
+
+				local newCommand, newButton = Command(commandName, index, function()
+					self.textbox.Text = `{commandName} `
+				end)
+				newCommand.Parent = self.commandList
+				self.autoCompleteList.list[index] = newCommand
+
+				-- Mark first as selected
+				if index == 1 then
+					newButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					newButton.BackgroundTransparency = 0.8
+					self.autoCompleteList.selected = commandName
+				end
+
+				local connection = self.autoCompleteList.event.Event:Connect(function(newIndex)
+					if newIndex == index then
+						newButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+						newButton.BackgroundTransparency = 0.8
+						self.autoCompleteList.selected = commandName
+					else
+						newButton.BackgroundColor3 = Color3.fromRGB(163, 162, 165)
+						newButton.BackgroundTransparency = 1
+					end
+				end) :: RBXScriptConnection
+				-- Clean up connections
+				newCommand.Destroying:Once(function()
+					if connection.Connected then
+						connection:Disconnect()
+					end
+				end)
+			end
 		end
 	end)
 
-	self.send.Activated:Connect(function()
-		SendCurrentText()
-	end)
+	self.send.Activated:Connect(SendCurrentText)
 
 	self.currentChannelChanged.Event:Connect(function(newChannel: Channel.Channel)
 		local source = newChannel.channel:FindFirstChild(Players.LocalPlayer.Name)
 			or { CanSend = false } :: TextSource | { CanSend: boolean }
+
+		-- Reset autocomplete
+		ClearAutoCompleteFrame(self.commandList, self.autocomplete)
 
 		if self.isGuest == true then
 			self.canSend = false
@@ -380,6 +497,32 @@ function ChatChannelService:SwitchChannel(channel: Channel.Channel)
 		newMessage.LayoutOrder = message.Timestamp.UnixTimestamp
 		newMessage.Parent = self.list
 	end
+end
+
+function ChatChannelService:AddCommand(newCommand: TextChatCommand): ()
+	-- Prevents registering command twice
+	if ChatChannelService.Commands[newCommand.PrimaryAlias:lower()] then
+		return
+	end
+
+	DebugPrint(`Registering command: {newCommand.Name}`)
+
+	ChatChannelService.Commands[newCommand.PrimaryAlias:lower()] = {
+		AutocompleteVisible = newCommand.AutocompleteVisible,
+		Enabled = newCommand.Enabled,
+
+		PrimaryAlias = newCommand.PrimaryAlias,
+		SecondaryAlias = newCommand.SecondaryAlias,
+	}
+
+	if CommandOverrides[newCommand.Name] then
+		DebugPrint(`Found override for command, using it instead of base implementation.`)
+		newCommand.Triggered:Connect(function(textSource: TextSource, originalString: string)
+			task.spawn(CommandOverrides[newCommand.Name], ChatChannelService, textSource, originalString)
+		end)
+	end
+
+	DebugPrint(`Succesfully registered command as: {newCommand.PrimaryAlias:lower()}`)
 end
 
 function ChatChannelService:Setup(): ()
@@ -575,21 +718,24 @@ function ChatChannelService:Setup(): ()
 			end)
 		end)
 
-		-- Connect clear channel command
-		TextChatService:WaitForChild("TextChatCommands"):WaitForChild("RBXClearCommand").Triggered:Connect(function()
-			ChatChannelService.ChannelHistory:ClearChannelHistory(self.currentChannel.channel)
-		end)
-
-		-- Connect team channel command
-		TextChatService:WaitForChild("TextChatCommands"):WaitForChild("RBXTeamCommand").Triggered:Connect(function()
-			for _, team in Teams:GetTeams() do
-				if Players.LocalPlayer.Team == team then
-					local _, foundChannel = GetChannelFromName(team.Name)
-
-					ChatChannelService:SwitchChannel(foundChannel)
-				end
+		-- Connect command overrides
+		TextChatService:WaitForChild("TextChatCommands").ChildAdded:Connect(function(addedCommand: TextChatCommand)
+			if
+				addedCommand:IsA("TextChatCommand")
+				and not ChatChannelService.Commands[addedCommand.PrimaryAlias:lower()]
+			then
+				ChatChannelService:AddCommand(addedCommand)
 			end
 		end)
+		for _, addedCommand: TextChatCommand in TextChatService:WaitForChild("TextChatCommands"):GetChildren() do
+			-- Prevents registering command twice
+			if
+				addedCommand:IsA("TextChatCommand")
+				and not ChatChannelService.Commands[addedCommand.PrimaryAlias:lower()]
+			then
+				ChatChannelService:AddCommand(addedCommand)
+			end
+		end
 
 		self.icon:setEnabled(true)
 		DebugPrint("Fully loaded channels! Chat icon has been enabled")
@@ -602,7 +748,7 @@ function ChatChannelService:Setup(): ()
 
 		local ChatCommands = Instance.new("Folder")
 		ChatCommands.Name = "ChatCommands"
-		ChatChannels.Parent = ChatCommands
+		ChatChannels.Parent = TextChatService
 
 		DebugPrint("ChatChannelService is ready for client!")
 		Loaded.Value = true

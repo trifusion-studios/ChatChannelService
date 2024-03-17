@@ -1,4 +1,4 @@
-return function(): (Frame, TextBox, TextButton)
+return function(): (Frame, TextBox, TextButton, Frame, Frame)
 	local InputBar = Instance.new("Frame")
 	InputBar.Name = "chatInputBar"
 	InputBar.AutomaticSize = Enum.AutomaticSize.Y
@@ -130,7 +130,7 @@ return function(): (Frame, TextBox, TextButton)
 	AutocompleteDropdown.AnchorPoint = Vector2.new(0, 1)
 	AutocompleteDropdown.BackgroundTransparency = 1
 	AutocompleteDropdown.Size = UDim2.fromScale(0.95, 0)
-	AutocompleteDropdown.Visible = false
+	AutocompleteDropdown.Visible = true
 	AutocompleteDropdown.ZIndex = 2
 
 	local UISizeConstraint = Instance.new("UISizeConstraint")
@@ -208,5 +208,10 @@ return function(): (Frame, TextBox, TextButton)
 	UIPadding1.PaddingTop = UDim.new(0, 8)
 	UIPadding1.Parent = InputBar
 
-	return InputBar, TextBox, SendButton
+	Layout1:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		ScrollView.CanvasSize = UDim2.new(0, 0, 0, Layout1.AbsoluteContentSize.Y)
+		AutocompleteDropdown.Size = UDim2.new(0.95, 0, 0, Layout1.AbsoluteContentSize.Y)
+	end)
+
+	return InputBar, TextBox, SendButton, OffsetFrame, AutocompleteDropdown, ScrollView
 end
