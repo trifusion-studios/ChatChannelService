@@ -59,7 +59,7 @@ return function(): (Frame, TextBox, TextButton, Frame, Frame)
 	TextBox.Name = "TextBox"
 	TextBox.ClearTextOnFocus = false
 	TextBox.FontFace =
-		Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+		Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
 	TextBox.PlaceholderColor3 = Color3.fromRGB(178, 178, 178)
 	TextBox.PlaceholderText = "To chat click here or press / key"
 	TextBox.Text = ""
