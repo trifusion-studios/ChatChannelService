@@ -44,3 +44,11 @@ To contribute to the project, please follow these guidelines:
 - Fork this repository
 - Make your changes (keep it clean!)
 - Submit a pull request with a detailed description of what you changed/added
+
+Follow these steps to setup  the development environment for contributing to ChatChannelService:
+
+1. Clone the repository
+2. Run `git submodule init`
+3. Run `git submodule update`
+4. Run `rojo serve default.project.json`
+5. Open Roblox Studio and load the `default.rbxl` file
