@@ -243,7 +243,16 @@ function ChatChannelService:SetupUI(): boolean
 			then
 				self.autoCompleteList.index = self.autoCompleteList.index - 1
 				self.autoCompleteList.event:Fire(self.autoCompleteList.index)
-				self.commandScroll.CanvasPosition = Vector2.new(0, (self.autoCompleteList.index - 1) * 30)
+
+				if ((self.autoCompleteList.index - 1) * 30) >= self.commandScroll.AbsoluteWindowSize.Y then
+					self.commandScroll.CanvasPosition = Vector2.new(
+						0,
+						self.commandScroll.AbsoluteWindowSize.Y
+							+ (((self.autoCompleteList.index - 1) * 30) - self.commandScroll.AbsoluteWindowSize.Y)
+					)
+				else
+					self.commandScroll.CanvasPosition = Vector2.zero
+				end
 			elseif
 				input.KeyCode == Enum.KeyCode.Down
 				and self.autoCompleteList.index >= 1
@@ -251,7 +260,16 @@ function ChatChannelService:SetupUI(): boolean
 			then
 				self.autoCompleteList.index = self.autoCompleteList.index + 1
 				self.autoCompleteList.event:Fire(self.autoCompleteList.index)
-				self.commandScroll.CanvasPosition = Vector2.new(0, (self.autoCompleteList.index - 1) * 30)
+
+				if ((self.autoCompleteList.index - 1) * 30) >= self.commandScroll.AbsoluteWindowSize.Y then
+					self.commandScroll.CanvasPosition = Vector2.new(
+						0,
+						self.commandScroll.AbsoluteWindowSize.Y
+							+ (((self.autoCompleteList.index - 1) * 30) - self.commandScroll.AbsoluteWindowSize.Y)
+					)
+				else
+					self.commandScroll.CanvasPosition = Vector2.zero
+				end
 			elseif input.KeyCode == Enum.KeyCode.Tab then
 				self.textbox.Text = `{self.autoCompleteList.selected} `
 				self.textbox.CursorPosition = self.textbox.Text:len() + 1
