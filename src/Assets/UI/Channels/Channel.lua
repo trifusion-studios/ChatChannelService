@@ -1,5 +1,3 @@
-local TweenService = game:GetService("TweenService")
-
 export type Channel = {
 	name: string,
 	selected: boolean,
