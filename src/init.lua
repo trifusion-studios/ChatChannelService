@@ -526,33 +526,31 @@ function ChatChannelService:Setup(): ()
 			local newName = object.Name:gsub("RBX", "")
 
 			-- Check if any overrides match channel name
-			print("Showing overrides!")
-			print("Overrides:", ChannelOverrides)
 			for possibleMatch, override in ChannelOverrides do
-				print(possibleMatch)
 				if newName:match(possibleMatch) then
-					print("match yes!")
 					newName = override(self, newName)
 					break
 				end
 			end
 
-			print("New name:", newName)
+			DebugPrint(`Checking if player has source in channel...`)
 
 			-- check if player is in the channel
 			local source = object:FindFirstChild(Players.LocalPlayer.Name)
 				and object:WaitForChild(Players.LocalPlayer.Name)
 			if source then
+				DebugPrint("Adding player to channel:", newName)
 				ChatChannelService:AddChannel(object, newName)
 			end
 
 			-- Make sure when added, player can chat
 			object.ChildAdded:Connect(function(child)
-				DebugPrint("CHILD ADDED")
 				if child:IsA("TextSource") == false then
 					-- Prevent other instances from triggering channels
 					return
 				end
+
+				DebugPrint("New textsource found for ", object.Name)
 
 				if child.Name == Players.LocalPlayer.Name then
 					ChatChannelService:AddChannel(object, newName)
@@ -561,13 +559,13 @@ function ChatChannelService:Setup(): ()
 
 			-- Make sure when removed, player doesn't see the channel anymore
 			object.ChildRemoved:Connect(function(child)
-				DebugPrint("CHILD REMOVED")
 				if child:IsA("TextSource") == false then
 					-- Prevent other instances from triggering channels
 					return
 				end
 
 				if child.Name == Players.LocalPlayer.Name then
+					DebugPrint("Player got removed from channel:", object.Name)
 					local _, channelExists = GetChannelFromTextChannel(object)
 
 					-- Prevent nil from beign removed
@@ -589,12 +587,8 @@ function ChatChannelService:Setup(): ()
 			local newName = object.Name:gsub("RBX", "")
 
 			-- Check if any overrides match channel name
-			print("Showing overrides!")
-			print("Overrides:", ChannelOverrides)
 			for possibleMatch, override in ChannelOverrides do
-				print(possibleMatch)
 				if newName:match(possibleMatch) then
-					print("match yes!")
 					newName = override(self, newName)
 					break
 				end
@@ -606,34 +600,32 @@ function ChatChannelService:Setup(): ()
 			local source = object:FindFirstChild(Players.LocalPlayer.Name)
 				and object:WaitForChild(Players.LocalPlayer.Name)
 			if source then
-				DebugPrint("SOURCE EXISTS")
+				DebugPrint("Adding player to channel:", newName)
 				ChatChannelService:AddChannel(object, newName)
 			end
 
-			DebugPrint("PAST ADDING CHANNEL")
-
 			-- Make sure when added, player can chat
 			object.ChildAdded:Connect(function(child)
-				DebugPrint("CHILD ADDED")
 				if child:IsA("TextSource") == false then
 					-- Prevent other instances from triggering channels
 					return
 				end
 
 				if child.Name == Players.LocalPlayer.Name then
+					DebugPrint("Player got added to channel:", object.Name)
 					ChatChannelService:AddChannel(object, newName)
 				end
 			end)
 
 			-- Make sure when removed, player doesn't see the channel anymore
 			object.ChildRemoved:Connect(function(child)
-				DebugPrint("CHILD REMOVED")
 				if child:IsA("TextSource") == false then
 					-- Prevent other instances from triggering channels
 					return
 				end
 
 				if child.Name == Players.LocalPlayer.Name then
+					DebugPrint("Player got removed from channel:", object.Name)
 					local _, channelExists = GetChannelFromTextChannel(object)
 
 					-- Prevent nil from beign removed
