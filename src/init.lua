@@ -443,6 +443,9 @@ end
 function ChatChannelService:RemoveChannel(channel: Channel.Channel)
 	DebugPrint(`Removing channel: {channel.name}`)
 
+	-- Switch to general channel as default
+	ChatChannelService:SwitchChannel(ChatChannelService.Channels["General"])
+
 	-- Prevent original channel from being lost
 	local originalInstance = channel.channel
 	local originalName = channel.name
