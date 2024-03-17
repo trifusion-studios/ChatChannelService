@@ -51,4 +51,4 @@ Follow these steps to setup  the development environment for contributing to Cha
 2. Run `git submodule init`
 3. Run `git submodule update`
 4. Run `rojo serve default.project.json`
-5. Open Roblox Studio and load the `default.rbxl` file
+5. Open Roblox Studio in a new file and connect to the rojo server with rojo plugin
