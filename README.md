@@ -12,12 +12,10 @@ To use `ChatChannelService`, simply add your own channels to the `ChatChannels` 
 Here is an example of how to set up ChatChannelService:
 
 ```lua
--- On the client
-local ChatChannelService = require(ReplicatedStorage.ChatChannelService)
-ChatChannelService:Setup()
+-- On the client and server
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ChatChannelService = require(ReplicatedStorage:WaitForChild("ChatChannelService"))
 
--- On the server
-local ChatChannelService = require(ReplicatedStorage.ChatChannelService)
 ChatChannelService:Setup()
 ```
 
