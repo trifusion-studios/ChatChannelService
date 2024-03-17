@@ -33,32 +33,32 @@ end
 
 return {
 	["Whisper:"] = function(_, name: string)
-        local newName = ""
-        local split = name:gsub("Whisper:", ""):split("_")
-        local possibleTarget = FindPlayerByUserId(split[2])
+		local newName = ""
+		local split = name:gsub("Whisper:", ""):split("_")
+		local possibleTarget = FindPlayerByUserId(split[2])
 
-        -- Prevent target from being localplayer
-        if possibleTarget == Players.LocalPlayer then
-            possibleTarget = FindPlayerByUserId(split[1])
-            newName = possibleTarget and possibleTarget.Name or "Whisper"
-        elseif possibleTarget ~= Players.LocalPlayer then
-            newName = possibleTarget.Name
-        end
+		-- Prevent target from being localplayer
+		if possibleTarget == Players.LocalPlayer then
+			possibleTarget = FindPlayerByUserId(split[1])
+			newName = possibleTarget and possibleTarget.Name or "Whisper"
+		elseif possibleTarget ~= Players.LocalPlayer then
+			newName = possibleTarget.Name
+		end
 
 		return newName
 	end,
 	["Team"] = function(_, name: string)
-        local newName = ""
-        local teamColor = name:gsub("Team", ""):split()[1]
-        local brickColor = BrickColor.new(teamColor)
-        local possibleTeam = GetTeamFromColor(brickColor)
+		local newName = ""
+		local teamColor = name:gsub("Team", ""):split()[1]
+		local brickColor = BrickColor.new(teamColor)
+		local possibleTeam = GetTeamFromColor(brickColor)
 
-        if possibleTeam then
-            newName = possibleTeam.Name
-        else
-            newName = "Team" -- Failsafe in case brick color fails
-        end
+		if possibleTeam then
+			newName = possibleTeam.Name
+		else
+			newName = "Team" -- Failsafe in case brick color fails
+		end
 
-        return newName
+		return newName
 	end,
 }
