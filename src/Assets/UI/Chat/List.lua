@@ -51,6 +51,10 @@ return function(): (Frame, Frame)
 	Layout.SortOrder = Enum.SortOrder.LayoutOrder
 	Layout.Parent = RCTScrollContentView
 
+	VerticalLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		RCTScrollView.CanvasPosition = Vector2.new(0, VerticalLayout.AbsoluteContentSize.Y)
+	end)
+
 	RCTScrollContentView.Parent = RCTScrollView
 
 	RCTScrollView.Parent = LockedScrollView
