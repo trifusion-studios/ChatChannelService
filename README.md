@@ -37,7 +37,6 @@ myChannel.Name = "My Channel"
 -- Add the channel to the ChatChannels folder
 myChannel.Parent = ChatChannels
 ```
-
 This will create a new public channel called "My Channel".
 
 ## Contribute
