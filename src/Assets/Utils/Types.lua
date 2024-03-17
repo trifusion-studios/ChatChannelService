@@ -30,7 +30,7 @@ export type ChatChannelService = {
 	Commands: { [string]: Command },
 	ChannelHistory: History.HistoryObject,
 
-	SetupUI: (self: ChatChannelService) -> (),
+	SetupUI: (self: ChatChannelService) -> boolean,
 	AddChannel: (self: ChatChannelService, channel: TextChannel, customName: string?) -> Channel,
 	RemoveChannel: (self: ChatChannelService, channel: TextChannel) -> (),
 	SwitchChannel: (self: ChatChannelService, channel: TextChannel) -> (),
