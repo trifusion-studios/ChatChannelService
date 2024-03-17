@@ -34,7 +34,7 @@ end
 return {
 	["Whisper:"] = function(_, name: string)
         local newName = ""
-        local split = name:gsub("RBXWhisper:", ""):split("_")
+        local split = name:gsub("Whisper:", ""):split("_")
         local possibleTarget = FindPlayerByUserId(split[2])
 
         -- Prevent target from being localplayer
@@ -49,7 +49,7 @@ return {
 	end,
 	["Team"] = function(_, name: string)
         local newName = ""
-        local teamColor = name:gsub("RBXTeam", ""):split()[1]
+        local teamColor = name:gsub("Team", ""):split()[1]
         local brickColor = BrickColor.new(teamColor)
         local possibleTeam = GetTeamFromColor(brickColor)
 

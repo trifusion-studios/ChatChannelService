@@ -6,7 +6,6 @@ local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
-local Teams = game:GetService("Teams")
 local TextChatService = game:GetService("TextChatService")
 local UserInputService = game:GetService("UserInputService")
 
@@ -65,19 +64,6 @@ local function DebugPrint(...: any)
 	end
 end
 
-local function FindPlayerByUserId(userid: number? | string?): Player?
-	if typeof(userid) == "string" then
-		userid = tonumber(userid)
-	end
-	for _, player: Player in Players:GetPlayers() do
-		if player.UserId == userid then
-			return player
-		end
-	end
-
-	return nil
-end
-
 local function CountArray(array: { [any]: any }): number
 	local count = 0
 	for _ in array do
@@ -94,26 +80,6 @@ local function GetChannelFromTextChannel(textChannel: TextChannel): (string?, Ch
 	end
 
 	return nil, nil
-end
-
-local function GetChannelFromName(channelName: string): (string?, Channel.Channel?)
-	for name, channel in ChatChannelService.Channels do
-		if name == channelName then
-			return name, channel
-		end
-	end
-
-	return nil, nil
-end
-
-local function GetTeamFromColor(color: BrickColor): Team?
-	for _, team in Teams:GetTeams() do
-		if team.TeamColor == color then
-			return team
-		end
-	end
-
-	return nil
 end
 
 local function GetAliasFromCommands(): { string }
@@ -155,6 +121,7 @@ function ChatChannelService:SetupUI(): boolean
 	-- try to disable the chat gui
 	local disabledChat = SafePcall(15, 5, function()
 		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
+		DebugPrint("Succesfully disabled core chat gui!")
 	end)
 
 	if disabledChat == false then
@@ -570,15 +537,45 @@ function ChatChannelService:Setup(): ()
 				end
 			end
 
+			print("New name:", newName)
+
 			-- check if player is in the channel
 			local source = object:FindFirstChild(Players.LocalPlayer.Name)
 				and object:WaitForChild(Players.LocalPlayer.Name)
 			if source then
 				ChatChannelService:AddChannel(object, newName)
-			else
-				-- Continue as player isn't allowed in this channel
-				continue
 			end
+
+			-- Make sure when added, player can chat
+			object.ChildAdded:Connect(function(child)
+				DebugPrint("CHILD ADDED")
+				if child:IsA("TextSource") == false then
+					-- Prevent other instances from triggering channels
+					return
+				end
+
+				if child.Name == Players.LocalPlayer.Name then
+					ChatChannelService:AddChannel(object, newName)
+				end
+			end)
+
+			-- Make sure when removed, player doesn't see the channel anymore
+			object.ChildRemoved:Connect(function(child)
+				DebugPrint("CHILD REMOVED")
+				if child:IsA("TextSource") == false then
+					-- Prevent other instances from triggering channels
+					return
+				end
+
+				if child.Name == Players.LocalPlayer.Name then
+					local _, channelExists = GetChannelFromTextChannel(object)
+
+					-- Prevent nil from beign removed
+					if channelExists then
+						ChatChannelService:RemoveChannel(channelExists)
+					end
+				end
+			end)
 		end
 
 		-- List to added connection, for channels like (teams/whisper)
