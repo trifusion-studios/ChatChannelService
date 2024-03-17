@@ -9,12 +9,16 @@ return function()
 	ChannelsFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	ChannelsFrame.BorderSizePixel = 0
 	ChannelsFrame.ClipsDescendants = false
-	ChannelsFrame.Position = UDim2.fromOffset(10, 220)
+	ChannelsFrame.Position = UDim2.fromOffset(10, 225)
 	ChannelsFrame.Selectable = true
-	ChannelsFrame.Size = UDim2.new(00, 450, 0, 35)
+	ChannelsFrame.Size = UDim2.new(00, 450, 0, 30)
 	ChannelsFrame.ZIndex = 2
 	ChannelsFrame.SelectionGroup = true
 	ChannelsFrame.LayoutOrder = 5
+
+	local Padding = Instance.new("UIPadding")
+	Padding.PaddingTop = UDim.new(0, 5)
+	Padding.Parent = ChannelsFrame
 
 	local Frame = Instance.new("ScrollingFrame")
 	Frame.Name = "Frame"

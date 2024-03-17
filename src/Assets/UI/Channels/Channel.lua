@@ -27,32 +27,37 @@ return function(name: string, color: Color3?, originalTextChannel: TextChannel)
 		channel = originalTextChannel,
 	} :: Channel
 
-	local Channel = Instance.new("TextButton")
+	local Channel = Instance.new("ImageButton")
 	Channel.Name = name
-	Channel.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json")
-	Channel.Text = name
-	Channel.TextColor3 = Color3.fromRGB(255, 255, 255)
-	Channel.TextSize = 14
-	Channel.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
-	Channel.BackgroundColor3 = Color3.fromRGB(43, 47, 50)
-	Channel.BorderColor3 = Color3.fromRGB(0, 0, 0)
-	Channel.BorderSizePixel = 0
-	Channel.Size = UDim2.new(0, 200, 0.9, 0)
-	Channel.ZIndex = 2
+	Channel.Image = "rbxassetid://10791872163"
+	Channel.ImageRectOffset = Vector2.new(922, 550)
+	Channel.ImageRectSize = Vector2.new(78, 78)
+	Channel.ScaleType = Enum.ScaleType.Slice
+	Channel.SliceCenter = Rect.new(39, 39, 39, 39)
+	Channel.AnchorPoint = Vector2.new(0.5, 0.5)
+	Channel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Channel.BackgroundTransparency = 1
+	Channel.Position = UDim2.fromScale(0.5, 0.5)
+	Channel.Size = UDim2.fromScale(1, 1)
 
-	local Corner = Instance.new("UICorner")
-	Corner.Name = "Corner"
-	Corner.CornerRadius = UDim.new(0, 10)
-	Corner.Parent = Channel
+	local TextLabel = Instance.new("TextLabel")
+	TextLabel.Name = "TextLabel"
+	TextLabel.FontFace = Font.new("rbxasset://fonts/families/BuilderSans.json")
+	TextLabel.Text = name
+	TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	TextLabel.TextSize = 20
+	TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	TextLabel.BackgroundTransparency = 1
+	TextLabel.Size = UDim2.fromScale(1, 1)
+	TextLabel.Parent = Channel
 
-	local UIStroke = Instance.new("UIStroke")
-	UIStroke.Name = "UIStroke"
-	UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	UIStroke.Color = Color3.fromRGB(255, 255, 255)
-	UIStroke.Thickness = 2
-	UIStroke.Transparency = 0.3
-	UIStroke.Enabled = false
-	UIStroke.Parent = Channel
+	local UIPadding = Instance.new("UIPadding")
+	UIPadding.Name = "UIPadding"
+	UIPadding.PaddingBottom = UDim.new(0.2, 0)
+	UIPadding.PaddingLeft = UDim.new(0.1, 0)
+	UIPadding.PaddingRight = UDim.new(0.1, 0)
+	UIPadding.PaddingTop = UDim.new(0.2, 0)
+	UIPadding.Parent = Channel
 
 	-- Set instance variable and activated event
 	self.instance = Channel
@@ -61,43 +66,13 @@ return function(name: string, color: Color3?, originalTextChannel: TextChannel)
 		self.selected = selected
 
 		if selected then
-			UIStroke.Enabled = true
-
-			-- Cancel tween as channel has been selected
-			if self.unreadTween then
-				self.unreadTween:Cancel()
-			end
+			Channel.Image = "rbxassetid://10791861382"
+			Channel.ImageRectOffset = Vector2.new(904, 438)
+			TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
 		else
-			UIStroke.Enabled = false
-		end
-	end
-
-	function self.OnMessage()
-		if self.selected == false and type(self.unreadTween) == "nil" then
-			-- Setup UIStroke
-			UIStroke.Transparency = 0
-			UIStroke.Enabled = true
-
-			local tween = TweenService:Create(
-				UIStroke,
-				TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, -1, true, 0),
-				{
-					["Transparency"] = 1,
-				}
-			)
-
-			-- Revert transparency and clean up tween once finished
-			tween.Completed:Once(function()
-				UIStroke.Transparency = 0.3
-
-				tween:Destroy()
-				self.unreadTween = nil
-			end)
-
-			-- Save tween and play it
-			self.unreadTween = tween
-
-			tween:Play()
+			Channel.Image = "rbxassetid://10791872163"
+			Channel.ImageRectOffset = Vector2.new(922, 550)
+			TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 		end
 	end
 
@@ -115,9 +90,9 @@ return function(name: string, color: Color3?, originalTextChannel: TextChannel)
 		return self
 	end
 
-	self._instanceChangedConnection = self.instance.Changed:Connect(function(property: string)
+	self._instanceChangedConnection = TextLabel.Changed:Connect(function(property: string)
 		if property == "TextBounds" then
-			self.instance.Size = UDim2.new(0, (self.instance.TextBounds.X + 10), 0.9, 0)
+			self.instance.Size = UDim2.new(0, (TextLabel.TextBounds.X + 10), 1, 0)
 		end
 	end)
 

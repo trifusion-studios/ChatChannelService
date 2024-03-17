@@ -210,7 +210,6 @@ function ChatChannelService:SetupUI(): boolean
 		DebugPrint(`Received message! Current status: {textChatMessage.Status}`)
 		local _, channel = GetChannelFromTextChannel(textChatMessage.TextChannel)
 		if channel then
-			channel.OnMessage()
 			ChatChannelService.ChannelHistory:AddEntry(textChatMessage)
 		end
 	end)
