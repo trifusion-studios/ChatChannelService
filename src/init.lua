@@ -118,15 +118,17 @@ function ChatChannelService:SetupUI(): boolean
 		return false
 	end
 
-	-- try to disable the chat gui
-	local disabledChat = SafePcall(15, 5, function()
-		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
-		DebugPrint("Succesfully disabled core chat gui!")
-	end)
+	-- try to disable the chat gui with a delay to prevent from disabling it too fast
+	task.delay(5, function()
+		local disabledChat = SafePcall(15, 5, function()
+			StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
+			DebugPrint("Succesfully disabled core chat gui!")
+		end)
 
-	if disabledChat == false then
-		error("[ChatChannelService] Failed to disable the default chat, channels are now disabled on this client.")
-	end
+		if disabledChat == false then
+			error("[ChatChannelService] Failed to disable the default chat, channels are now disabled on this client.")
+		end
+	end)
 
 	self.icon = Icon.new()
 	self.icon:setEnabled(false)
