@@ -36,7 +36,7 @@ local ChatMessage = require(Messages:WaitForChild("ChatMessage"))
 local Icon = RunService:IsClient() and require(Modules:WaitForChild("Icon"))
 
 local ChatChannelService = {
-	Debug = true,
+	Debug = false,
 	Channels = {} :: { [string]: Channel.Channel },
 	Commands = {} :: { [string]: Types.Command },
 	ChannelHistory = History.new(),
