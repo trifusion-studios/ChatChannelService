@@ -7,7 +7,7 @@
           "$className": "Folder",
           
           "Icon": {
-            "$path": "./modules/TopbarPlus/src"
+            "$path": "./modules/TopbarPlus/"
           }
         }
     }
