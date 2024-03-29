@@ -10,9 +10,8 @@
         "Modules": {
           "$className": "Folder",
 
-          "$ignoreUnknownInstances": true,
           "Icon": {
-            "$path": "./modules/TopbarPlus/src"
+            "$path": "./modules/TopbarPlus/withoutLink.project.json"
           }
         }
       }
