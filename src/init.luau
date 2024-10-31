@@ -191,6 +191,7 @@ function ChatChannelService:SetupUI(): boolean
 	-- Connect events
 	self.icon:bindEvent("selected", function()
 		self.ui.Enabled = true
+		self.icon:clearNotices()
 	end)
 	self.icon:bindEvent("deselected", function()
 		self.ui.Enabled = false
