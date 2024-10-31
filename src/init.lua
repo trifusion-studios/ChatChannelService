@@ -514,7 +514,7 @@ function ChatChannelService:AddCommand(newCommand: TextChatCommand): ()
 	DebugPrint(`Succesfully registered command as: {newCommand.PrimaryAlias:lower()}`)
 end
 
-function ChatChannelService:Setup(): ()
+function ChatChannelService:Setup(overrideUI: ModuleScript?): ()
 	-- Make client wait until server has been loaded
 	if RunService:IsClient() then
 		DebugPrint("Waiting for server to load channels...")
@@ -522,11 +522,26 @@ function ChatChannelService:Setup(): ()
 			Loaded.Changed:Wait()
 		end
 
+		local customThemeEnabled = false
 		DebugPrint("Server has loaded channels, creating initial UI...")
-		local ui = ChatChannelService:SetupUI()
-		if ui == false then
-			DebugPrint("Failed to create custom UI, disabling ChatChannelService")
-			return
+		if overrideUI and overrideUI:IsA("ModuleScript") == true then
+			DebugPrint("Custom UI was given, loading UI from provided configuration...")
+			if ChatChannelService:SetupUI(require(overrideUI)) then
+				DebugPrint("Successfully setup custom theme, ChatChannelService has been enabled")
+				customThemeEnabled = true
+			else
+				DebugPrint("Failed to create UI with given theme, falling back to default UI.")
+			end
+		end
+
+		-- Prevent making UI again when custom theme was loaded
+		if customThemeEnabled == false then
+			DebugPrint("Setting up default UI")
+			local ui = ChatChannelService:SetupUI()
+			if ui == false then
+				DebugPrint("Failed to create default UI, disabling ChatChannelService")
+				return
+			end
 		end
 
 		DebugPrint("UI has been created, setting up default roblox channels...")
