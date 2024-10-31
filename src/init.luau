@@ -120,7 +120,7 @@ function ChatChannelService:SetupUI(): boolean
 
 	-- try to disable the chat gui with a delay to prevent from disabling it too fast
 	task.delay(5, function()
-		local disabledChat = SafePcall(15, 5, function()
+		local disabledChat = SafePcall(30, 1, ChatChannelService.Debug, function()
 			StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
 			DebugPrint("Succesfully disabled core chat gui!")
 		end)

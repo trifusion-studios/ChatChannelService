@@ -5,9 +5,10 @@
 --]]
 --!strict
 
-return function(retryLimit: number, delayTime: number, ...: any): (boolean, ...any)
+return function(retryLimit: number, delayTime: number, logError: boolean, ...: any): (boolean, ...any)
 	local success, response = false, nil
 	local tried = 0
+	local verbose = false
 
 	-- If no retry limit, use infinite loop
 	if retryLimit <= 0 then
@@ -16,6 +17,8 @@ return function(retryLimit: number, delayTime: number, ...: any): (boolean, ...a
 
 			if success then
 				return success, response
+			elseif verbose then
+				task.spawn(error, response) -- Prevents error 
 			end
 
 			task.wait(delayTime)
@@ -30,6 +33,10 @@ return function(retryLimit: number, delayTime: number, ...: any): (boolean, ...a
 				return success, response
 			else
 				tried += 1
+
+				if verbose then
+					task.spawn(error, response) -- Prevents error 
+				end
 			end
 
 			task.wait(delayTime)
