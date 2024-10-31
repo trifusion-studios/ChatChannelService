@@ -4,6 +4,8 @@
     @GGshor
 ]]
 
+export type ChannelChangedMessage  = "CLEARED" | "REMOVED" | TextChatMessage
+
 export type History = {
 	new: () -> HistoryObject,
 }
@@ -23,7 +25,7 @@ export type HistoryObject = {
 
 	ChannelChanged: (
 		self: HistoryObject,
-		callback: (message: TextChatMessage | "CLEARED" | "REMOVED", changedChannel: TextChannel?) -> ()
+		callback: (message: ChannelChangedMessage, changedChannel: TextChannel?) -> ()
 	) -> RBXScriptConnection,
 }
 
@@ -31,7 +33,7 @@ local History = {} :: History
 History.__index = History
 
 function History:ChannelChanged(callback: (
-	message: TextChatMessage | "CLEARED" | "REMOVED",
+	message: ChannelChangedMessage,
 	changedChannel: TextChannel?
 ) -> ()): RBXScriptConnection
 	return self._onChannelChanged.Event:Connect(callback)

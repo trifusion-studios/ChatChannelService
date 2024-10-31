@@ -415,8 +415,14 @@ function ChatChannelService:AddChannel(channel: TextChannel, customName: string?
 	-- Add message if channel is active
 	local channelChangedConnection: RBXScriptConnection = nil
 	channelChangedConnection = ChatChannelService.ChannelHistory:ChannelChanged(
-		function(message: TextChatMessage | "CLEARED" | "REMOVED", changedChannel: TextChannel?)
-			if
+		function(message: History.ChannelChangedMessage, changedChannel: TextChannel?)
+			if message == "REMOVED" and changedChannel == channel then
+				-- Disconnect to prevent memory leaks
+				channelChangedConnection:Disconnect()
+			elseif message == "CLEARED" and self.currentChannel.channel == channel then
+				-- Use SwitchChannel to reset ui as no message means channel got reset
+				ChatChannelService:SwitchChannel(self.currentChannel)
+			elseif
 				typeof(message) == "Instance"
 				and message.TextChannel == channel
 				and self.currentChannel.channel == channel
@@ -424,12 +430,6 @@ function ChatChannelService:AddChannel(channel: TextChannel, customName: string?
 				local newMessage = ChatMessage(message)
 				newMessage.LayoutOrder = message.Timestamp.UnixTimestamp
 				newMessage.Parent = self.list
-			elseif message == "CLEARED" and self.currentChannel.channel == channel then
-				-- Use SwitchChannel to reset ui as no message means channel got reset
-				ChatChannelService:SwitchChannel(self.currentChannel)
-			elseif message == "REMOVED" and changedChannel == channel then
-				-- Disconnect to prevent memory leaks
-				channelChangedConnection:Disconnect()
 			end
 		end
 	)
