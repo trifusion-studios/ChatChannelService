@@ -138,7 +138,7 @@ function ChatChannelService.SetupUI(self: Types.ChatChannelService): boolean
 		{ "IconButton", "BackgroundTransparency", 0.5, "selected" },
 		{ "IconImage", "ImageColor3", Color3.fromRGB(255, 255, 255), "selected" },
 		{ "IconImage", "ImageRectSize", Vector2.new(36, 36) },
-		{ "IconImage", "ImageRectOffset", Vector2.new(152, 266) }
+		{ "IconImage", "ImageRectOffset", Vector2.new(76, 190) }
 	})
 	self.icon:setImageScale(1) -- Fixes image from being too small
 
