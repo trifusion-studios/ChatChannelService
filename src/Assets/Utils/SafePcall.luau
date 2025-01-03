@@ -8,7 +8,7 @@
 return function(retryLimit: number, delayTime: number, logError: boolean, ...: any): (boolean, ...any)
 	local success, response = false, nil
 	local tried = 0
-	local verbose = false
+	local verbose = logError
 
 	-- If no retry limit, use infinite loop
 	if retryLimit <= 0 then
