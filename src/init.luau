@@ -207,7 +207,7 @@ function ChatChannelService.SetupUI(self: Types.ChatChannelService): boolean
 			self.icon:notify()
 		end
 
-		DebugPrint(`Received message! Current status: {textChatMessage.Status}`)
+		DebugPrint(`Received message! From channel: {textChatMessage.TextChannel}, with status: {textChatMessage.Status}`)
 		local _, channel = GetChannelFromTextChannel(textChatMessage.TextChannel)
 		if channel then
 			ChatChannelService.ChannelHistory:AddEntry(textChatMessage)
@@ -434,6 +434,7 @@ function ChatChannelService.AddChannel(self: Types.ChatChannelService, channel: 
 		end
 	)
 
+
 	DebugPrint("Channel has been successfully added")
 
 	return newChannel
@@ -576,7 +577,7 @@ function ChatChannelService.Setup(self: Types.ChatChannelService, overrideUI: Mo
 			local source = object:FindFirstChild(Players.LocalPlayer.Name)
 				and object:WaitForChild(Players.LocalPlayer.Name)
 			if source then
-				DebugPrint("Adding player to channel:", newName)
+				DebugPrint(`Adding player to channel: {newName}`)
 				ChatChannelService:AddChannel(object, newName)
 			end
 
@@ -587,7 +588,7 @@ function ChatChannelService.Setup(self: Types.ChatChannelService, overrideUI: Mo
 					return
 				end
 
-				DebugPrint("New textsource found for ", object.Name)
+				DebugPrint(`New textsource found for {object.Name}`)
 
 				if child.Name == Players.LocalPlayer.Name then
 					ChatChannelService:AddChannel(object, newName)
@@ -602,7 +603,7 @@ function ChatChannelService.Setup(self: Types.ChatChannelService, overrideUI: Mo
 				end
 
 				if child.Name == Players.LocalPlayer.Name then
-					DebugPrint("Player got removed from channel:", object.Name)
+					DebugPrint(`Player got removed from channel: {object.Name}`)
 					local _, channelExists = GetChannelFromTextChannel(object)
 
 					-- Prevent nil from beign removed
@@ -637,7 +638,7 @@ function ChatChannelService.Setup(self: Types.ChatChannelService, overrideUI: Mo
 			local source = object:FindFirstChild(Players.LocalPlayer.Name)
 				and object:WaitForChild(Players.LocalPlayer.Name)
 			if source then
-				DebugPrint("Adding player to channel:", newName)
+				DebugPrint(`Adding player to channel: {newName}`)
 				ChatChannelService:AddChannel(object, newName)
 			end
 
@@ -649,7 +650,7 @@ function ChatChannelService.Setup(self: Types.ChatChannelService, overrideUI: Mo
 				end
 
 				if child.Name == Players.LocalPlayer.Name then
-					DebugPrint("Player got added to channel:", object.Name)
+					DebugPrint(`Player got added to channel: {object.Name}`)
 					ChatChannelService:AddChannel(object, newName)
 				end
 			end)
@@ -662,7 +663,7 @@ function ChatChannelService.Setup(self: Types.ChatChannelService, overrideUI: Mo
 				end
 
 				if child.Name == Players.LocalPlayer.Name then
-					DebugPrint("Player got removed from channel:", object.Name)
+					DebugPrint(`Player got removed from channel: {object.Name}`)
 					local _, channelExists = GetChannelFromTextChannel(object)
 
 					-- Prevent nil from beign removed
