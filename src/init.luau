@@ -37,7 +37,7 @@ local Icon = RunService:IsClient() and require(Modules:WaitForChild("Icon"))
 
 local ChatChannelService = {
 	Debug = false,
-	Channels = {} :: { [string]: Channel.Channel },
+	Channels = {} :: { [string]: Types.Channel },
 	Commands = {} :: { [string]: Types.Command },
 	ChannelHistory = History.new(),
 } :: Types.ChatChannelService
@@ -106,7 +106,7 @@ local function ClearAutoCompleteFrame(listFrame: Frame, mainWindow: Frame): ()
 	mainWindow.Visible = false
 end
 
-function ChatChannelService:SetupUI(): boolean
+function ChatChannelService.SetupUI(self: Types.ChatChannelService): boolean
 	if RunService:IsServer() == true then
 		-- Prevent server making icons
 		DebugPrint("Tried to setup UI on server")
@@ -155,7 +155,7 @@ function ChatChannelService:SetupUI(): boolean
 	self.input.Parent = self.root
 	self.window.Parent = self.root
 
-	self.currentChannel = nil :: Channel.Channel?
+	self.currentChannel = nil :: Types.Channel?
 	self.currentChannelChanged = Instance.new("BindableEvent")
 	self.canSend = false
 	self.isGuest = (Players.LocalPlayer.UserId < 0 and RunService:IsStudio() == false)
@@ -383,7 +383,7 @@ function ChatChannelService:SetupUI(): boolean
 	return true
 end
 
-function ChatChannelService:AddChannel(channel: TextChannel, customName: string?): Channel.Channel
+function ChatChannelService.AddChannel(self: Types.ChatChannelService, channel: TextChannel, customName: string?): Types.Channel
 	local name = customName or channel.Name
 
 	DebugPrint(`Adding channel: {name}`)
@@ -414,8 +414,8 @@ function ChatChannelService:AddChannel(channel: TextChannel, customName: string?
 
 	-- Add message if channel is active
 	local channelChangedConnection: RBXScriptConnection = nil
-	channelChangedConnection = ChatChannelService.ChannelHistory:ChannelChanged(
-		function(message: History.ChannelChangedMessage, changedChannel: TextChannel?)
+	channelChangedConnection = ChatChannelService.ChannelHistory.ChannelChanged:Connect(
+		function(message: Types.ChannelChangedMessage, changedChannel: TextChannel?)
 			if message == "REMOVED" and changedChannel == channel then
 				-- Disconnect to prevent memory leaks
 				channelChangedConnection:Disconnect()
@@ -439,7 +439,7 @@ function ChatChannelService:AddChannel(channel: TextChannel, customName: string?
 	return newChannel
 end
 
-function ChatChannelService:RemoveChannel(channel: Channel.Channel)
+function ChatChannelService.RemoveChannel(self: Types.ChatChannelService, channel: Types.Channel)
 	DebugPrint(`Removing channel: {channel.name}`)
 
 	-- Switch to general channel as default
@@ -457,7 +457,7 @@ function ChatChannelService:RemoveChannel(channel: Channel.Channel)
 	ChatChannelService.ChannelHistory:RemoveChannel(originalInstance)
 end
 
-function ChatChannelService:SwitchChannel(channel: Channel.Channel)
+function ChatChannelService.SwitchChannel(self: Types.ChatChannelService, channel: Types.Channel)
 	local oldChannel = self.currentChannel :: Channel.Channel
 
 	-- Prevent old channel from also being selected
@@ -488,7 +488,7 @@ function ChatChannelService:SwitchChannel(channel: Channel.Channel)
 	end
 end
 
-function ChatChannelService:AddCommand(newCommand: TextChatCommand): ()
+function ChatChannelService.AddCommand(self: Types.ChatChannelService, newCommand: TextChatCommand): ()
 	-- Prevents registering command twice
 	if ChatChannelService.Commands[newCommand.PrimaryAlias:lower()] then
 		return
@@ -514,7 +514,7 @@ function ChatChannelService:AddCommand(newCommand: TextChatCommand): ()
 	DebugPrint(`Succesfully registered command as: {newCommand.PrimaryAlias:lower()}`)
 end
 
-function ChatChannelService:Setup(overrideUI: ModuleScript?): ()
+function ChatChannelService.Setup(self: Types.ChatChannelService, overrideUI: ModuleScript?): ()
 	-- Make client wait until server has been loaded
 	if RunService:IsClient() then
 		DebugPrint("Waiting for server to load channels...")

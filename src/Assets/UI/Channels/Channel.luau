@@ -1,20 +1,6 @@
-export type Channel = {
-	name: string,
-	selected: boolean,
-	unread: boolean,
-	unreadTween: Tween?,
-	instance: TextButton,
-	color: Color3?,
-	channel: TextChannel,
+local Types = require(script.Parent.Parent.Parent:WaitForChild("Utils"):WaitForChild("Types"))
 
-	OnSelected: (selected: boolean) -> (),
-	OnMessage: () -> (),
-	Destroy: () -> nil,
-
-	OnActivated: (callback: (inputObject: InputObject, clickCount: number) -> ()) -> RBXScriptConnection,
-}
-
-return function(name: string, color: Color3?, originalTextChannel: TextChannel)
+return function(name: string, color: Color3?, originalTextChannel: TextChannel): Types.Channel
 	local self = {
 		name = name,
 		selected = false,
@@ -23,7 +9,7 @@ return function(name: string, color: Color3?, originalTextChannel: TextChannel)
 		instance = nil,
 		color = color or nil,
 		channel = originalTextChannel,
-	} :: Channel
+	} :: Types.Channel
 
 	local Channel = Instance.new("ImageButton")
 	Channel.Name = name

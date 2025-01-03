@@ -4,42 +4,12 @@
     @GGshor
 ]]
 
-export type ChannelChangedMessage  = "CLEARED" | "REMOVED" | TextChatMessage
+local Types = require(script.Parent:WaitForChild("Types"))
 
-export type History = {
-	new: () -> HistoryObject,
-}
-
--- Holds entries
-export type HistoryObject = {
-	messages: {
-		[TextChannel]: {
-			[number]: TextChatMessage,
-		},
-	},
-
-	AddEntry: (self: HistoryObject, message: TextChatMessage) -> (),
-	GetChannelHistory: (self: HistoryObject, channel: TextChannel) -> { [number]: TextChatMessage },
-	ClearChannelHistory: (self: HistoryObject, channel: TextChannel) -> (),
-	RemoveChannel: (self: HistoryObject, channel: TextChannel) -> (),
-
-	ChannelChanged: (
-		self: HistoryObject,
-		callback: (message: ChannelChangedMessage, changedChannel: TextChannel?) -> ()
-	) -> RBXScriptConnection,
-}
-
-local History = {} :: History
+local History = {} :: Types.History
 History.__index = History
 
-function History:ChannelChanged(callback: (
-	message: ChannelChangedMessage,
-	changedChannel: TextChannel?
-) -> ()): RBXScriptConnection
-	return self._onChannelChanged.Event:Connect(callback)
-end
-
-function History:AddEntry(message: TextChatMessage)
+function History.AddEntry(self: Types.HistoryObject, message: TextChatMessage)
 	-- Prevent entry indexing nil
 	if self.messages[message.TextChannel] == nil then
 		self.messages[message.TextChannel] = {}
@@ -50,11 +20,11 @@ function History:AddEntry(message: TextChatMessage)
 	self._onChannelChanged:Fire(message, message.TextChannel)
 end
 
-function History:GetChannelHistory(channel: TextChannel): { [number]: TextChatMessage }
+function History.GetChannelHistory(self: Types.HistoryObject, channel: TextChannel): { [number]: TextChatMessage }
 	return self.messages[channel]
 end
 
-function History:ClearChannelHistory(channel: TextChannel): ()
+function History.ClearChannelHistory(self: Types.HistoryObject, channel: TextChannel): ()
 	if self.messages[channel] then
 		self.messages[channel] = {}
 
@@ -63,7 +33,7 @@ function History:ClearChannelHistory(channel: TextChannel): ()
 	end
 end
 
-function History:RemoveChannel(channel: TextChannel): ()
+function History.RemoveChannel(self: Types.HistoryObject, channel: TextChannel): ()
 	if self.messages[channel] then
 		self.messages[channel] = nil
 
@@ -72,13 +42,14 @@ function History:RemoveChannel(channel: TextChannel): ()
 	end
 end
 
-function History.new()
-	local self = setmetatable(History, {})
+function History.new(): Types.HistoryObject
+	local onChannelChanged = Instance.new("BindableEvent")
 
-	self.messages = {} :: { [number]: TextChatMessage }
-	self._onChannelChanged = Instance.new("BindableEvent")
-
-	return self
+	return setmetatable({
+		messages = {},
+		ChannelChanged = onChannelChanged.Event,
+		_onChannelChanged = Instance.new("BindableEvent").Changed
+	})
 end
 
 return History
