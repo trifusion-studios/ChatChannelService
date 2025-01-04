@@ -7,33 +7,22 @@ export type CustomSignal<T...> = {
 
 export type ChannelChangedMessage  = "CLEARED" | "REMOVED" | TextChatMessage
 
-export type ChannelChangedCallbackArgs = {
-	message: ChannelChangedMessage,
-	changedChannel: TextChannel?
-}
-
 export type History = {
-	new: () -> HistoryObject,
-}
-
--- Holds entries
-export type HistoryObject = {
 	messages: {
 		[TextChannel]: {
 			[number]: TextChatMessage,
 		},
 	},
 
-	AddEntry: (self: HistoryObject, message: TextChatMessage) -> (),
-	GetChannelHistory: (self: HistoryObject, channel: TextChannel) -> { [number]: TextChatMessage },
-	ClearChannelHistory: (self: HistoryObject, channel: TextChannel) -> (),
-	RemoveChannel: (self: HistoryObject, channel: TextChannel) -> (),
+	AddEntry: (self: History, message: TextChatMessage) -> (),
+	GetChannelHistory: (self: History, channel: TextChannel) -> { [number]: TextChatMessage },
+	ClearChannelHistory: (self: History, channel: TextChannel) -> (),
+	RemoveChannel: (self: History, channel: TextChannel) -> (),
 
-	ChannelChanged: CustomSignal<ChannelChangedCallbackArgs>,
-	-- ChannelChangedV1: (
-	-- 	self: HistoryObject,
-	-- 	callback: (message: ChannelChangedMessage, changedChannel: TextChannel?) -> ()
-	-- ) -> RBXScriptConnection,
+	ChannelChanged: CustomSignal<ChannelChangedMessage, TextChannel?>,
+
+	-- Internal properties
+	_onChannelChangedEvent: BindableEvent,
 }
 
 export type Channel = {
@@ -45,11 +34,10 @@ export type Channel = {
 	color: Color3?,
 	channel: TextChannel,
 
-	OnSelected: (selected: boolean) -> (),
-	OnMessage: () -> (),
+	SetSelected: (selected: boolean) -> (),
 	Destroy: () -> nil,
 
-	OnActivated: (callback: (inputObject: InputObject, clickCount: number) -> ()) -> RBXScriptConnection,
+	Activated: CustomSignal<InputObject, number>,
 }
 
 export type Command = {
@@ -64,11 +52,8 @@ export type ChatChannelService = {
 	Debug: boolean,
 	Channels: { [string]: Channel },
 	Commands: { [string]: Command },
-	ChannelHistory: HistoryObject,
+	ChannelHistory: History,
 
-	--[[
-		Creates the custom chat UI and returns a success boolean
-	]]
 	SetupUI: (self: ChatChannelService) -> boolean,
 
 	AddChannel: (self: ChatChannelService, channel: TextChannel, customName: string?) -> Channel,

@@ -408,7 +408,7 @@ function ChatChannelService.AddChannel(self: Types.ChatChannelService, channel: 
 	newChannel.instance.Parent = self.channelScroll
 
 	-- Connect pressed event
-	newChannel.OnActivated(function()
+	newChannel.Activated:Connect(function()
 		ChatChannelService:SwitchChannel(newChannel)
 	end)
 
@@ -459,17 +459,17 @@ function ChatChannelService.RemoveChannel(self: Types.ChatChannelService, channe
 end
 
 function ChatChannelService.SwitchChannel(self: Types.ChatChannelService, channel: Types.Channel)
-	local oldChannel = self.currentChannel :: Channel.Channel
+	local oldChannel = self.currentChannel :: Types.Channel
 
 	-- Prevent old channel from also being selected
 	if oldChannel ~= nil and oldChannel.selected == true then
-		oldChannel.OnSelected(false)
+		oldChannel.SetSelected(false)
 	end
 
 	-- Set new channel as selected
 	self.currentChannel = channel
 	self.currentChannelChanged:Fire(channel)
-	self.currentChannel.OnSelected(true)
+	self.currentChannel.SetSelected(true)
 
 	-- Destroy old channel list
 	self.window:Destroy()

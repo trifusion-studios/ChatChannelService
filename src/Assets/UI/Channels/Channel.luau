@@ -45,8 +45,9 @@ return function(name: string, color: Color3?, originalTextChannel: TextChannel):
 
 	-- Set instance variable and activated event
 	self.instance = Channel
+	self.Activated = self.instance.Activated
 
-	function self.OnSelected(selected: boolean)
+	function self.SetSelected(selected: boolean)
 		self.selected = selected
 
 		if selected then
@@ -58,10 +59,6 @@ return function(name: string, color: Color3?, originalTextChannel: TextChannel):
 			Channel.ImageRectOffset = Vector2.new(922, 550)
 			TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 		end
-	end
-
-	function self.OnActivated(callback: (inputObject: InputObject, clickCount: number) -> ()): RBXScriptConnection
-		return self.instance.Activated:Connect(callback)
 	end
 
 	function self.Destroy(): nil

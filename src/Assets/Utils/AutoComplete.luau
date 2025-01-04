@@ -1,8 +1,13 @@
-return function(searchTable: { string }, searchKey: string): { string }
-	-- Searches through searchTable and finds anything that matches the searchKey
+--[[
+	Searches through an array and returns an array of strings that match the search key.
+
+	@GGshor
+]]
+
+return function(searchArray: { string }, searchKey: string): { string }
 	local found = {}
 
-	for _, value: string in searchTable do
+	for _, value: string in searchArray do
 		if
 			typeof(value:lower():match(`^{searchKey:lower()}`)) == "string"
 			and value:lower():match(`^{searchKey:lower()}`) ~= ""
