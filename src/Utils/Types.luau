@@ -54,14 +54,44 @@ export type ChatChannelServiceClient = {
 	Commands: { [string]: Command },
 	ChannelHistory: History,
 
-	SetupUI: (self: ChatChannelServiceClient) -> boolean,
+	SetupUI: (self: ChatChannelServiceClient, overrideTheme: {}?) -> boolean,
 
 	AddChannel: (self: ChatChannelServiceClient, channel: TextChannel, customName: string?) -> Channel,
-	RemoveChannel: (self: ChatChannelServiceClient, channel: TextChannel) -> (),
-	SwitchChannel: (self: ChatChannelServiceClient, channel: TextChannel) -> (),
+	RemoveChannel: (self: ChatChannelServiceClient, channel: Channel) -> (),
+	SwitchChannel: (self: ChatChannelServiceClient, channel: Channel) -> (),
 	AddCommand: (self: ChatChannelServiceClient, Command: TextChatCommand) -> (),
 
-	Setup: (self: ChatChannelServiceClient) -> (),
+	Setup: (self: ChatChannelServiceClient, overrideUI: ModuleScript?) -> (),
+
+	-- Internal properties
+	icon: any,
+	ui: ScreenGui,
+	root: Frame,
+	window: Frame,
+	list: Frame,
+	input: Frame,
+	textbox: TextBox,
+	send: TextButton,
+	commandList: Frame,
+	autocomplete: Frame,
+	commandScroll: ScrollingFrame,
+
+	currentChannel: Channel?,
+	currentChannelChanged: BindableEvent,
+	canSend: boolean,
+	isGuest: boolean,
+
+	channelList: Frame,
+	channelScroll: ScrollingFrame,
+
+	autoCompleteList: {
+		selected: string,
+		index: number,
+		list: {Frame},
+		event: BindableEvent
+	},
+
+	isFocused: boolean
 }
 
 export type ChatChannelServiceServer = {

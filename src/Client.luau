@@ -66,7 +66,6 @@ local function DebugPrint(...: any): ()
 		end
 		finalString = `{finalString}\n{debug.traceback()}`
 		print(finalString)
-		finalString = nil
 	end
 end
 
@@ -147,8 +146,8 @@ function ChatChannelServiceClient.SetupUI(self: Types.ChatChannelServiceClient):
 		{ "IconButton", "BackgroundTransparency", 0.5, "selected" },
 		{ "IconImage", "ImageColor3", Color3.fromRGB(255, 255, 255), "selected" },
 		{ "IconImage", "ImageRectSize", Vector2.new(36, 36) },
-		{ "IconImage", "ImageRectOffset", Vector2.new(76, 190) }
-	})
+		{ "IconImage", "ImageRectOffset", Vector2.new(76, 190)}
+	} :: {{any}})
 	self.icon:setImageScale(1) -- Fixes image from being too small
 
 	self.ui = Instance.new("ScreenGui")
@@ -186,7 +185,9 @@ function ChatChannelServiceClient.SetupUI(self: Types.ChatChannelServiceClient):
 		DebugPrint("Sending message!")
 
 		-- Run send async in seperate thread as it can stop the current thread
-		task.spawn(self.currentChannel.channel.SendAsync, self.currentChannel.channel, self.textbox.Text)
+		if self.currentChannel then
+			task.spawn(self.currentChannel.channel.SendAsync, self.currentChannel.channel, self.textbox.Text)
+		end
 
 		-- Reset UI
 		self.textbox.PlaceholderText = "To chat click here or press / key"
@@ -227,7 +228,7 @@ function ChatChannelServiceClient.SetupUI(self: Types.ChatChannelServiceClient):
 	self.autoCompleteList = {
 		selected = "",
 		index = 2,
-		list = {} :: { string },
+		list = {},
 		event = Instance.new("BindableEvent"),
 	}
 
@@ -300,13 +301,14 @@ function ChatChannelServiceClient.SetupUI(self: Types.ChatChannelServiceClient):
 
 	self.textbox.Changed:Connect(function(property)
 		if property == "Text" then
+			local sendIcon = ((self.send:WaitForChild("SendIcon")) :: any)
 			if self.textbox.Text:len() > 0 then
-				self.send.SendIcon.ImageColor3 = Color3.new(1, 1, 1)
-				self.send.SendIcon.ImageTransparency = 0
+				sendIcon.ImageColor3 = Color3.new(1, 1, 1)
+				sendIcon.ImageTransparency = 0
 				self.textbox.TextTransparency = 0
 			else
-				self.send.SendIcon.ImageColor3 = Color3.fromRGB(178, 178, 178)
-				self.send.SendIcon.ImageTransparency = 0.5
+				sendIcon.ImageColor3 = Color3.fromRGB(178, 178, 178)
+				sendIcon.ImageTransparency = 0.5
 				self.textbox.TextTransparency = 0.5
 			end
 
@@ -362,9 +364,9 @@ function ChatChannelServiceClient.SetupUI(self: Types.ChatChannelServiceClient):
 
 	self.send.Activated:Connect(SendCurrentText)
 
-	self.currentChannelChanged.Event:Connect(function(newChannel: Channel.Channel)
-		local source = newChannel.channel:FindFirstChild(Players.LocalPlayer.Name)
-			or { CanSend = false } :: TextSource | { CanSend: boolean }
+	self.currentChannelChanged.Event:Connect(function(newChannel: Types.Channel)
+		local source = ((newChannel.channel:FindFirstChild(Players.LocalPlayer.Name)) :: TextSource?)
+			or { CanSend = false } :: { CanSend: boolean }
 
 		-- Reset autocomplete
 		ClearAutoCompleteFrame(self.commandList, self.autocomplete)
@@ -425,6 +427,10 @@ function ChatChannelServiceClient.AddChannel(self: Types.ChatChannelServiceClien
 	local channelChangedConnection: RBXScriptConnection = nil
 	channelChangedConnection = ChatChannelServiceClient.ChannelHistory.ChannelChanged:Connect(
 		function(message: Types.ChannelChangedMessage, changedChannel: TextChannel?)
+			if self.currentChannel == nil then
+				return
+			end
+
 			if message == "REMOVED" and changedChannel == channel then
 				-- Disconnect to prevent memory leaks
 				channelChangedConnection:Disconnect()
@@ -478,7 +484,10 @@ function ChatChannelServiceClient.SwitchChannel(self: Types.ChatChannelServiceCl
 	-- Set new channel as selected
 	self.currentChannel = channel
 	self.currentChannelChanged:Fire(channel)
-	self.currentChannel.SetSelected(true)
+
+	if self.currentChannel then
+		self.currentChannel.SetSelected(true)
+	end
 
 	-- Destroy old channel list
 	self.window:Destroy()
@@ -488,7 +497,7 @@ function ChatChannelServiceClient.SwitchChannel(self: Types.ChatChannelServiceCl
 	self.window.Parent = self.root
 
 	-- Get new channel history
-	local entries = ChatChannelServiceClient.ChannelHistory:GetChannelHistory(channel.channel) or {}
+	local entries = ChatChannelServiceClient.ChannelHistory:GetChannelHistory(channel.channel)
 
 	-- Add all messages to the list
 	for _, message: TextChatMessage in entries do
@@ -500,13 +509,13 @@ end
 
 function ChatChannelServiceClient.AddCommand(self: Types.ChatChannelServiceClient, newCommand: TextChatCommand): ()
 	-- Prevents registering command twice
-	if ChatChannelServiceClient.Commands[newCommand.PrimaryAlias:lower()] then
+	if self.Commands[newCommand.PrimaryAlias:lower()] then
 		return
 	end
 
 	DebugPrint(`Registering command: {newCommand.Name}`)
 
-	ChatChannelServiceClient.Commands[newCommand.PrimaryAlias:lower()] = {
+	self.Commands[newCommand.PrimaryAlias:lower()] = {
 		AutocompleteVisible = newCommand.AutocompleteVisible,
 		Enabled = newCommand.Enabled,
 
@@ -517,7 +526,7 @@ function ChatChannelServiceClient.AddCommand(self: Types.ChatChannelServiceClien
 	if CommandOverrides[newCommand.Name] then
 		DebugPrint(`Found override for command, using it instead of base implementation.`)
 		newCommand.Triggered:Connect(function(textSource: TextSource, originalString: string)
-			task.spawn(CommandOverrides[newCommand.Name], ChatChannelServiceClient, textSource, originalString)
+			task.spawn(CommandOverrides[newCommand.Name], self, textSource, originalString)
 		end)
 	end
 
@@ -536,11 +545,17 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 		DebugPrint("Server has loaded channels, creating initial UI...")
 		if overrideUI and overrideUI:IsA("ModuleScript") == true then
 			DebugPrint("Custom UI was given, loading UI from provided configuration...")
-			if ChatChannelServiceClient:SetupUI(require(overrideUI)) then
-				DebugPrint("Successfully setup custom theme, ChatChannelServiceClient has been enabled")
-				customThemeEnabled = true
+			local success, response: any = pcall(require, overrideUI)
+
+			if success == false then
+				warn(`[ChatChannelService] Failed to load given override module, got response: {response}`)
 			else
-				DebugPrint("Failed to create UI with given theme, falling back to default UI.")
+				if ChatChannelServiceClient:SetupUI(response) then
+					DebugPrint("Successfully setup custom theme, ChatChannelServiceClient has been enabled")
+					customThemeEnabled = true
+				else
+					DebugPrint("Failed to create UI with given theme, falling back to default UI.")
+				end
 			end
 		end
 
@@ -713,7 +728,7 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 		end
 
 		-- Connect event when custom channels get added
-		TextChatService:WaitForChild("ChatChannels").ChildAdded:Connect(function(object)
+		TextChatService:WaitForChild("ChatChannels").ChildAdded:Connect(function(object: TextChannel)
 			if object:IsA("TextChannel") == false then
 				-- Prevent other instances from being setup
 				return
@@ -727,15 +742,18 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 			end
 
 			-- Connect events
-			object.ChildAdded:Connect(function(newObject: TextSource)
+			object.ChildAdded:Connect(function(newObject: Instance | TextSource)
 				if newObject:IsA("TextSource") and newObject.UserId == Players.LocalPlayer.UserId then
 					ChatChannelServiceClient:AddChannel(object)
 				end
 			end)
 
-			object.ChildRemoved:Connect(function(oldObject: TextSource)
+			object.ChildRemoved:Connect(function(oldObject: Instance | TextSource)
 				if oldObject:IsA("TextSource") and oldObject.UserId == Players.LocalPlayer.UserId then
-					ChatChannelServiceClient:RemoveChannel(object)
+					local _, foundChannel = GetChannelFromTextChannel(object)
+					if foundChannel then
+						ChatChannelServiceClient:RemoveChannel(foundChannel)
+					end
 				end
 			end)
 		end)

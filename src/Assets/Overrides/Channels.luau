@@ -8,6 +8,8 @@
 local Players = game:GetService("Players")
 local Teams = game:GetService("Teams")
 
+local Types = require(script.Parent.Parent.Parent:WaitForChild("Utils"):WaitForChild("Types"))
+
 local function FindPlayerByUserId(userid: number? | string?): Player?
 	if typeof(userid) == "string" then
 		userid = tonumber(userid)
@@ -61,4 +63,4 @@ return {
 
 		return newName
 	end,
-}
+} :: {[string]: (self: Types.ChatChannelServiceClient, name: string) -> string}

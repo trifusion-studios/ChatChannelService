@@ -1,4 +1,4 @@
-return function(): (Frame, TextBox, TextButton, Frame, Frame)
+return function(): (Frame, TextBox, TextButton, Frame, Frame, ScrollingFrame)
 	local InputBar = Instance.new("Frame")
 	InputBar.Name = "chatInputBar"
 	InputBar.AutomaticSize = Enum.AutomaticSize.Y

@@ -21,7 +21,7 @@ function History.AddEntry(self: Types.History, message: TextChatMessage)
 end
 
 function History.GetChannelHistory(self: Types.History, channel: TextChannel): { [number]: TextChatMessage }
-	return self.messages[channel]
+	return self.messages[channel] or {}
 end
 
 function History.ClearChannelHistory(self: Types.History, channel: TextChannel): ()
