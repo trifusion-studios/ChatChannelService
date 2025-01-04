@@ -48,20 +48,29 @@ export type Command = {
 	SecondaryAlias: string,
 }
 
-export type ChatChannelService = {
+export type ChatChannelServiceClient = {
 	Debug: boolean,
 	Channels: { [string]: Channel },
 	Commands: { [string]: Command },
 	ChannelHistory: History,
 
-	SetupUI: (self: ChatChannelService) -> boolean,
+	SetupUI: (self: ChatChannelServiceClient) -> boolean,
 
-	AddChannel: (self: ChatChannelService, channel: TextChannel, customName: string?) -> Channel,
-	RemoveChannel: (self: ChatChannelService, channel: TextChannel) -> (),
-	SwitchChannel: (self: ChatChannelService, channel: TextChannel) -> (),
-	AddCommand: (self: ChatChannelService, Command: TextChatCommand) -> (),
+	AddChannel: (self: ChatChannelServiceClient, channel: TextChannel, customName: string?) -> Channel,
+	RemoveChannel: (self: ChatChannelServiceClient, channel: TextChannel) -> (),
+	SwitchChannel: (self: ChatChannelServiceClient, channel: TextChannel) -> (),
+	AddCommand: (self: ChatChannelServiceClient, Command: TextChatCommand) -> (),
 
-	Setup: (self: ChatChannelService) -> (),
+	Setup: (self: ChatChannelServiceClient) -> (),
 }
+
+export type ChatChannelServiceServer = {
+	Debug: boolean,
+	Loaded: BoolValue,
+
+	Setup: (self: ChatChannelServiceServer) -> (),
+}
+
+export type ChatChannelService = ChatChannelServiceClient & ChatChannelServiceServer
 
 return {}
