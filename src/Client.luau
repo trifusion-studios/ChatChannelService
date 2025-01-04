@@ -128,7 +128,7 @@ function ChatChannelServiceClient.SetupUI(self: Types.ChatChannelServiceClient):
 
 	-- try to disable the chat gui with a delay to prevent from disabling it too fast
 	task.delay(5, function()
-		local disabledChat = SafePcall(30, 1, ChatChannelServiceClient.Debug, function()
+		local disabledChat = SafePcall(30, 1, self.Debug, function()
 			StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
 			DebugPrint("Succesfully disabled core chat gui!")
 		end)
@@ -220,7 +220,7 @@ function ChatChannelServiceClient.SetupUI(self: Types.ChatChannelServiceClient):
 		DebugPrint(`Received message! From channel: {textChatMessage.TextChannel}, with status: {textChatMessage.Status}`)
 		local _, channel = GetChannelFromTextChannel(textChatMessage.TextChannel)
 		if channel then
-			ChatChannelServiceClient.ChannelHistory:AddEntry(textChatMessage)
+			self.ChannelHistory:AddEntry(textChatMessage)
 		end
 	end)
 
@@ -323,8 +323,8 @@ function ChatChannelServiceClient.SetupUI(self: Types.ChatChannelServiceClient):
 
 				-- Prevent showing hidden/disabled commands
 				if
-					ChatChannelServiceClient.Commands[commandName].AutocompleteVisible == false
-					or ChatChannelServiceClient.Commands[commandName].Enabled == false
+					self.Commands[commandName].AutocompleteVisible == false
+					or self.Commands[commandName].Enabled == false
 				then
 					continue
 				end
@@ -399,33 +399,33 @@ function ChatChannelServiceClient.AddChannel(self: Types.ChatChannelServiceClien
 
 	DebugPrint(`Adding channel: {name}`)
 
-	if ChatChannelServiceClient.Channels[name] then
+	if self.Channels[name] then
 		error(`[ChatChannelServiceClient] Duplicate channel name! Name: {name}`)
 	end
 
 	-- Setup channel
 	local color = channel:GetAttribute("ChatColor")
 	if typeof(color) ~= "Color3" and typeof(color) ~= "nil" then
-		error(`[ChatChannelServiceClient] Inccorrect color type, expected Color3 or nil! Channel name: {name}`)
+		error(`[ChatChannelServiceClient] Incorrect color type, expected Color3 or nil! Channel name: {name}`)
 	end
 
 	local newChannel = Channel(name, color, channel)
-	ChatChannelServiceClient.Channels[name] = newChannel
+	self.Channels[name] = newChannel
 
 	-- Ensure channel is in correct order
-	newChannel.instance.LayoutOrder = CountArray(ChatChannelServiceClient.Channels)
+	newChannel.instance.LayoutOrder = CountArray(self.Channels)
 
 	-- Parent channel to UI
 	newChannel.instance.Parent = self.channelScroll
 
 	-- Connect pressed event
 	newChannel.Activated:Connect(function()
-		ChatChannelServiceClient:SwitchChannel(newChannel)
+		self:SwitchChannel(newChannel)
 	end)
 
 	-- Add message if channel is active
 	local channelChangedConnection: RBXScriptConnection = nil
-	channelChangedConnection = ChatChannelServiceClient.ChannelHistory.ChannelChanged:Connect(
+	channelChangedConnection = self.ChannelHistory.ChannelChanged:Connect(
 		function(message: Types.ChannelChangedMessage, changedChannel: TextChannel?)
 			if self.currentChannel == nil then
 				return
@@ -436,7 +436,7 @@ function ChatChannelServiceClient.AddChannel(self: Types.ChatChannelServiceClien
 				channelChangedConnection:Disconnect()
 			elseif message == "CLEARED" and self.currentChannel.channel == channel then
 				-- Use SwitchChannel to reset ui as no message means channel got reset
-				ChatChannelServiceClient:SwitchChannel(self.currentChannel)
+				self:SwitchChannel(self.currentChannel)
 			elseif
 				typeof(message) == "Instance"
 				and message.TextChannel == channel
@@ -459,18 +459,18 @@ function ChatChannelServiceClient.RemoveChannel(self: Types.ChatChannelServiceCl
 	DebugPrint(`Removing channel: {channel.name}`)
 
 	-- Switch to general channel as default
-	ChatChannelServiceClient:SwitchChannel(ChatChannelServiceClient.Channels["General"])
+	self:SwitchChannel(self.Channels["General"])
 
 	-- Prevent original channel from being lost
 	local originalInstance = channel.channel
 	local originalName = channel.name
 
 	-- First remove channel from index
-	ChatChannelServiceClient.Channels[originalName].Destroy()
-	ChatChannelServiceClient.Channels[originalName] = nil
+	self.Channels[originalName].Destroy()
+	self.Channels[originalName] = nil
 
 	-- Clear history
-	ChatChannelServiceClient.ChannelHistory:RemoveChannel(originalInstance)
+	self.ChannelHistory:RemoveChannel(originalInstance)
 end
 
 function ChatChannelServiceClient.SwitchChannel(self: Types.ChatChannelServiceClient, channel: Types.Channel)
@@ -497,7 +497,7 @@ function ChatChannelServiceClient.SwitchChannel(self: Types.ChatChannelServiceCl
 	self.window.Parent = self.root
 
 	-- Get new channel history
-	local entries = ChatChannelServiceClient.ChannelHistory:GetChannelHistory(channel.channel)
+	local entries = self.ChannelHistory:GetChannelHistory(channel.channel)
 
 	-- Add all messages to the list
 	for _, message: TextChatMessage in entries do
@@ -550,7 +550,7 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 			if success == false then
 				warn(`[ChatChannelService] Failed to load given override module, got response: {response}`)
 			else
-				if ChatChannelServiceClient:SetupUI(response) then
+				if self:SetupUI(response) then
 					DebugPrint("Successfully setup custom theme, ChatChannelServiceClient has been enabled")
 					customThemeEnabled = true
 				else
@@ -562,7 +562,7 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 		-- Prevent making UI again when custom theme was loaded
 		if customThemeEnabled == false then
 			DebugPrint("Setting up default UI")
-			local ui = ChatChannelServiceClient:SetupUI()
+			local ui = self:SetupUI()
 			if ui == false then
 				DebugPrint("Failed to create default UI, disabling ChatChannelServiceClient")
 				return
@@ -572,11 +572,11 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 		DebugPrint("UI has been created, setting up default roblox channels...")
 
 		-- Make general and system always first
-		ChatChannelServiceClient:AddChannel(
+		self:AddChannel(
 			TextChatService:WaitForChild("TextChannels"):WaitForChild("RBXGeneral"),
 			"General"
 		)
-		ChatChannelServiceClient:AddChannel(TextChatService:WaitForChild("TextChannels"):WaitForChild("RBXSystem"), "System")
+		self:AddChannel(TextChatService:WaitForChild("TextChannels"):WaitForChild("RBXSystem"), "System")
 
 		for _, object: TextChannel in TextChatService:WaitForChild("TextChannels"):GetChildren() do
 			if object:IsA("TextChannel") == false or object.Name == "RBXGeneral" or object.Name == "RBXSystem" then
@@ -602,7 +602,7 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 				and object:WaitForChild(Players.LocalPlayer.Name)
 			if source then
 				DebugPrint(`Adding player to channel: {newName}`)
-				ChatChannelServiceClient:AddChannel(object, newName)
+				self:AddChannel(object, newName)
 			end
 
 			-- Make sure when added, player can chat
@@ -615,7 +615,7 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 				DebugPrint(`New textsource found for {object.Name}`)
 
 				if child.Name == Players.LocalPlayer.Name then
-					ChatChannelServiceClient:AddChannel(object, newName)
+					self:AddChannel(object, newName)
 				end
 			end)
 
@@ -632,7 +632,7 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 
 					-- Prevent nil from beign removed
 					if channelExists then
-						ChatChannelServiceClient:RemoveChannel(channelExists)
+						self:RemoveChannel(channelExists)
 					end
 				end
 			end)
@@ -663,7 +663,7 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 				and object:WaitForChild(Players.LocalPlayer.Name)
 			if source then
 				DebugPrint(`Adding player to channel: {newName}`)
-				ChatChannelServiceClient:AddChannel(object, newName)
+				self:AddChannel(object, newName)
 			end
 
 			-- Make sure when added, player can chat
@@ -675,7 +675,7 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 
 				if child.Name == Players.LocalPlayer.Name then
 					DebugPrint(`Player got added to channel: {object.Name}`)
-					ChatChannelServiceClient:AddChannel(object, newName)
+					self:AddChannel(object, newName)
 				end
 			end)
 
@@ -692,14 +692,14 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 
 					-- Prevent nil from beign removed
 					if channelExists then
-						ChatChannelServiceClient:RemoveChannel(channelExists)
+						self:RemoveChannel(channelExists)
 					end
 				end
 			end)
 		end)
 
 		-- Select default channel as current
-		ChatChannelServiceClient:SwitchChannel(ChatChannelServiceClient.Channels["General"])
+		self:SwitchChannel(self.Channels["General"])
 
 		DebugPrint("Default Roblox channels have been set up, loading custom channels...")
 
@@ -714,12 +714,12 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 			local source = object:FindFirstChild(Players.LocalPlayer.Name)
 				and object:WaitForChild(Players.LocalPlayer.Name)
 			if source then
-				ChatChannelServiceClient:AddChannel(object)
+				self:AddChannel(object)
 			else
 				-- If player isn't in this channel, setup connection to wait for them to be added
 				object.ChildAdded:Connect(function(newObject)
 					if newObject:IsA("TextSource") and newObject.UserId == Players.LocalPlayer.UserId then
-						ChatChannelServiceClient:AddChannel(object)
+						self:AddChannel(object)
 					end
 				end)
 
@@ -738,13 +738,13 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 			local source = object:FindFirstChild(Players.LocalPlayer.Name)
 				and object:WaitForChild(Players.LocalPlayer.Name)
 			if source then
-				ChatChannelServiceClient:AddChannel(object)
+				self:AddChannel(object)
 			end
 
 			-- Connect events
 			object.ChildAdded:Connect(function(newObject: Instance | TextSource)
 				if newObject:IsA("TextSource") and newObject.UserId == Players.LocalPlayer.UserId then
-					ChatChannelServiceClient:AddChannel(object)
+					self:AddChannel(object)
 				end
 			end)
 
@@ -752,7 +752,7 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 				if oldObject:IsA("TextSource") and oldObject.UserId == Players.LocalPlayer.UserId then
 					local _, foundChannel = GetChannelFromTextChannel(object)
 					if foundChannel then
-						ChatChannelServiceClient:RemoveChannel(foundChannel)
+						self:RemoveChannel(foundChannel)
 					end
 				end
 			end)
@@ -762,9 +762,9 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 		TextChatService:WaitForChild("TextChatCommands").ChildAdded:Connect(function(addedCommand: TextChatCommand)
 			if
 				addedCommand:IsA("TextChatCommand")
-				and not ChatChannelServiceClient.Commands[addedCommand.PrimaryAlias:lower()]
+				and not self.Commands[addedCommand.PrimaryAlias:lower()]
 			then
-				ChatChannelServiceClient:AddCommand(addedCommand)
+				self:AddCommand(addedCommand)
 			end
 		end)
 		for _, addedCommand: TextChatCommand in TextChatService:WaitForChild("TextChatCommands"):GetChildren() do
@@ -773,7 +773,7 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 				addedCommand:IsA("TextChatCommand")
 				and not ChatChannelServiceClient.Commands[addedCommand.PrimaryAlias:lower()]
 			then
-				ChatChannelServiceClient:AddCommand(addedCommand)
+				self:AddCommand(addedCommand)
 			end
 		end
 
