@@ -1,4 +1,4 @@
-local Types = require(script.Parent.Parent.Parent:WaitForChild("Utils"):WaitForChild("Types"))
+local Types = require(script.Parent.Parent.Parent.Parent:WaitForChild("Utils"):WaitForChild("Types"))
 
 return function(name: string, color: Color3?, originalTextChannel: TextChannel): Types.Channel
 	local self = {
