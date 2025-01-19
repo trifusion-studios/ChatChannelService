@@ -39,7 +39,7 @@ return {
 		local split = name:gsub("Whisper:", ""):split("_")
 		local possibleTarget = FindPlayerByUserId(split[2])
 
-		-- Prevent target from being localplayer
+		-- Prevent target from being local player
 		if possibleTarget == Players.LocalPlayer then
 			possibleTarget = FindPlayerByUserId(split[1])
 			newName = possibleTarget and possibleTarget.Name or "Whisper"

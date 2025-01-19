@@ -128,13 +128,33 @@ function ChatChannelServiceClient.SetupUI(self: Types.ChatChannelServiceClient):
 
 	-- try to disable the chat gui with a delay to prevent from disabling it too fast
 	task.delay(5, function()
-		local disabledChat = SafePcall(30, 1, self.Debug, function()
+		local disabledChat = SafePcall(30, 5, self.Debug, function()
 			StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
-			DebugPrint("Succesfully disabled core chat gui!")
+			DebugPrint("Successfully disabled core chat gui!")
 		end)
 
 		if disabledChat == false then
 			error("[ChatChannelServiceClient] Failed to disable the default chat, channels are now disabled on this client.")
+		else
+			-- Check every 5 seconds if gui is enabled
+			task.spawn(function()
+				while true do
+					task.wait(5)
+
+					-- If chat is enabled again, automatically disable again.
+					if StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Chat) == true then
+						SafePcall(
+							30,
+							1,
+							false,
+							StarterGui.SetCoreGuiEnabled,
+							StarterGui,
+							Enum.CoreGuiType.Chat,
+							false
+						)
+					end
+				end
+			end)
 		end
 	end)
 
@@ -184,7 +204,7 @@ function ChatChannelServiceClient.SetupUI(self: Types.ChatChannelServiceClient):
 		-- Send message to current channel
 		DebugPrint("Sending message!")
 
-		-- Run send async in seperate thread as it can stop the current thread
+		-- Run send async in separate thread as it can stop the current thread
 		if self.currentChannel then
 			task.spawn(self.currentChannel.channel.SendAsync, self.currentChannel.channel, self.textbox.Text)
 		end
@@ -530,7 +550,7 @@ function ChatChannelServiceClient.AddCommand(self: Types.ChatChannelServiceClien
 		end)
 	end
 
-	DebugPrint(`Succesfully registered command as: {newCommand.PrimaryAlias:lower()}`)
+	DebugPrint(`Successfully registered command as: {newCommand.PrimaryAlias:lower()}`)
 end
 
 function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, overrideUI: ModuleScript?): ()
@@ -630,7 +650,7 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 					DebugPrint(`Player got removed from channel: {object.Name}`)
 					local _, channelExists = GetChannelFromTextChannel(object)
 
-					-- Prevent nil from beign removed
+					-- Prevent nil from being removed
 					if channelExists then
 						self:RemoveChannel(channelExists)
 					end
@@ -690,7 +710,7 @@ function ChatChannelServiceClient.Setup(self: Types.ChatChannelServiceClient, ov
 					DebugPrint(`Player got removed from channel: {object.Name}`)
 					local _, channelExists = GetChannelFromTextChannel(object)
 
-					-- Prevent nil from beign removed
+					-- Prevent nil from being removed
 					if channelExists then
 						self:RemoveChannel(channelExists)
 					end
