@@ -15,4 +15,4 @@ else
 	ChatChannelService = script:WaitForChild("Client")
 end
 
-return ChatChannelService
+return require(ChatChannelService)
