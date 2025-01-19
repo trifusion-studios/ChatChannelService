@@ -45,10 +45,11 @@ end
 function History.new(): Types.History
 	local onChannelChanged = Instance.new("BindableEvent")
 
-	local self: Types.History = setmetatable(History, {
+	local self = setmetatable({
 		messages = {},
+		ChannelChanged = onChannelChanged.Event,
 		_onChannelChangedEvent = onChannelChanged,
-	})
+	}, History)
 
 	return self
 end
