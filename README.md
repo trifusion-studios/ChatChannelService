@@ -1,9 +1,8 @@
 # ChatChannelService
 ChatChannelService is a service module that adds the channel UI back to the Roblox chat UI.
-Don't want to setup the whole module? Use the public copy place here on [Roblox](https://www.roblox.com/games/16696355151/ChatChannelService).
 
 ## Installation
-You can get the module through downloading it through the GitHub [release](https://github.com/GGshor/ChatChannelService/releases/latest/download/ChatChannelService.rbxm) or by using the [Marketplace](https://create.roblox.com/store/asset/16778864370) on Roblox.
+You can get the module through downloading it through the GitHub [release](https://github.com/GGshor/ChatChannelService/releases/latest/download/ChatChannelService.rbxm) or by using the [Marketplace](https://create.roblox.com/store/asset/121887097996734/ChatChannelService) on Roblox.
 Add the `ChatChannelService` module to the `ReplicatedStorage` service.
 Run `:Setup()` on both the client and the server to set up the module.
 
