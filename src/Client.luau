@@ -160,13 +160,12 @@ function ChatChannelServiceClient.SetupUI(self: Types.ChatChannelServiceClient):
 
 	self.icon = Icon.new()
 	self.icon:setEnabled(false)
-	self.icon:setImage("rbxasset://LuaPackages/Packages/_Index/FoundationImages/FoundationImages/SpriteSheets/img_set_1x_7.png")
+	self.icon:setImage("rbxasset://textures/ui/MenuBar/icon_chat.png")
 	self.icon:modifyTheme({
-		{ "IconButton", "BackgroundColor3", Color3.new(0, 0, 0), "selected" },
-		{ "IconButton", "BackgroundTransparency", 0.5, "selected" },
-		{ "IconImage", "ImageColor3", Color3.fromRGB(255, 255, 255), "selected" },
-		{ "IconImage", "ImageRectSize", Vector2.new(36, 36) },
-		{ "IconImage", "ImageRectOffset", Vector2.new(76, 190)}
+		{ "IconButton", "BackgroundColor3", Color3.fromRGB(18, 18, 20) },
+		{ "IconButton", "BackgroundTransparency", 0.08 },
+		{ "IconImage", "ImageColor3", Color3.fromRGB(247, 247, 248) },
+		{ "IconImage", "ImageRectSize", Vector2.new(52, 52) },
 	} :: {{any}})
 	self.icon:setImageScale(1) -- Fixes image from being too small
 
