@@ -9,7 +9,7 @@ local Types = require(script.Parent:WaitForChild("Utils"):WaitForChild("Types"))
 
 local ChatChannelServiceServer = {
 	Debug = false,
-	Loaded = script.Parent:WaitForChild("Loaded")
+	Loaded = script.Parent:WaitForChild("Loaded"),
 } :: Types.ChatChannelServiceServer
 
 --[=[
@@ -29,18 +29,18 @@ local function DebugPrint(...: any): ()
 end
 
 function ChatChannelServiceServer.Setup(self: Types.ChatChannelServiceServer): ()
-    DebugPrint("Setting up custom channel and commands folder...")
+	DebugPrint("Setting up custom channel and commands folder...")
 
-    local ChatChannels = Instance.new("Folder")
-    ChatChannels.Name = "ChatChannels"
-    ChatChannels.Parent = TextChatService
+	local ChatChannels = Instance.new("Folder")
+	ChatChannels.Name = "ChatChannels"
+	ChatChannels.Parent = TextChatService
 
-    local ChatCommands = Instance.new("Folder")
-    ChatCommands.Name = "ChatCommands"
-    ChatChannels.Parent = TextChatService
+	local ChatCommands = Instance.new("Folder")
+	ChatCommands.Name = "ChatCommands"
+	ChatChannels.Parent = TextChatService
 
 	self.Loaded.Value = true
-    DebugPrint("Setup done!")
+	DebugPrint("Setup done!")
 end
 
 return ChatChannelServiceServer

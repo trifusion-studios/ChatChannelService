@@ -5,7 +5,7 @@ export type CustomSignal<T...> = {
 	Wait: (self: CustomSignal<T...>) -> T...,
 }
 
-export type ChannelChangedMessage  = "CLEARED" | "REMOVED" | TextChatMessage
+export type ChannelChangedMessage = "CLEARED" | "REMOVED" | TextChatMessage
 
 export type History = {
 	messages: {
@@ -30,28 +30,19 @@ export type Channel = {
 	selected: boolean,
 	unread: boolean,
 	unreadTween: Tween?,
-	instance: TextButton,
-	color: Color3?,
-	channel: TextChannel,
+	uiInstance: ImageButton,
+	textChannel: TextChannel,
 
 	SetSelected: (selected: boolean) -> (),
 	Destroy: () -> nil,
 
-	Activated: CustomSignal<InputObject, number>,
-}
-
-export type Command = {
-	AutocompleteVisible: boolean,
-	Enabled: boolean,
-
-	PrimaryAlias: string,
-	SecondaryAlias: string,
+	Activated: RBXScriptSignal,
+	TextLabelChanged: RBXScriptConnection,
 }
 
 export type ChatChannelServiceClient = {
 	Debug: boolean,
 	Channels: { [string]: Channel },
-	Commands: { [string]: Command },
 	ChannelHistory: History,
 
 	SetupUI: (self: ChatChannelServiceClient, overrideTheme: {}?) -> boolean,
@@ -59,39 +50,17 @@ export type ChatChannelServiceClient = {
 	AddChannel: (self: ChatChannelServiceClient, channel: TextChannel, customName: string?) -> Channel,
 	RemoveChannel: (self: ChatChannelServiceClient, channel: Channel) -> (),
 	SwitchChannel: (self: ChatChannelServiceClient, channel: Channel) -> (),
-	AddCommand: (self: ChatChannelServiceClient, Command: TextChatCommand) -> (),
 
 	Setup: (self: ChatChannelServiceClient, overrideUI: ModuleScript?) -> (),
 
 	-- Internal properties
-	icon: any,
 	ui: ScreenGui,
 	root: Frame,
-	window: Frame,
-	list: Frame,
-	input: Frame,
-	textbox: TextBox,
-	send: TextButton,
-	commandList: Frame,
-	autocomplete: Frame,
-	commandScroll: ScrollingFrame,
 
 	currentChannel: Channel?,
-	currentChannelChanged: BindableEvent,
-	canSend: boolean,
-	isGuest: boolean,
 
 	channelList: Frame,
 	channelScroll: ScrollingFrame,
-
-	autoCompleteList: {
-		selected: string,
-		index: number,
-		list: {Frame},
-		event: BindableEvent
-	},
-
-	isFocused: boolean
 }
 
 export type ChatChannelServiceServer = {

@@ -1,14 +1,13 @@
+--!strict
+
 local Types = require(script.Parent.Parent.Parent.Parent:WaitForChild("Utils"):WaitForChild("Types"))
 
-return function(name: string, color: Color3?, originalTextChannel: TextChannel): Types.Channel
+return function(name: string, originalTextChannel: TextChannel): Types.Channel
 	local self = {
 		name = name,
 		selected = false,
 		unread = false,
-		unreadTween = nil,
-		instance = nil,
-		color = color or nil,
-		channel = originalTextChannel,
+		textChannel = originalTextChannel,
 	} :: Types.Channel
 
 	local Channel = Instance.new("ImageButton")
@@ -44,11 +43,21 @@ return function(name: string, color: Color3?, originalTextChannel: TextChannel):
 	UIPadding.Parent = Channel
 
 	-- Set instance variable and activated event
-	self.instance = Channel
-	self.Activated = self.instance.Activated
+	self.uiInstance = Channel
+	self.Activated = self.uiInstance.Activated
+
+	self.TextLabelChanged = TextLabel.Changed:Connect(function(property: string)
+		if self and self.uiInstance and property == "TextBounds" then
+			self.uiInstance.Size = UDim2.new(0, (TextLabel.TextBounds.X + 10), 1, 0)
+		end
+	end)
 
 	function self.SetSelected(selected: boolean)
-		self.selected = selected
+		if self then
+			self.selected = selected
+		else
+			return
+		end
 
 		if selected then
 			Channel.Image = "rbxassetid://10791861382"
@@ -62,37 +71,18 @@ return function(name: string, color: Color3?, originalTextChannel: TextChannel):
 	end
 
 	function self.Destroy(): nil
-		self._instanceChangedConnection:Disconnect()
+		if not self then
+			return nil
+		end
 
-		self.instance:Destroy()
+		self.TextLabelChanged:Disconnect()
+
+		self.uiInstance:Destroy()
 
 		self = nil
 
 		return self
 	end
 
-	self._instanceChangedConnection = TextLabel.Changed:Connect(function(property: string)
-		if property == "TextBounds" then
-			self.instance.Size = UDim2.new(0, (TextLabel.TextBounds.X + 10), 1, 0)
-		end
-	end)
-
-	originalTextChannel.OnIncomingMessage = function(message: TextChatMessage)
-		if not self then
-			-- Prevent when destroyed still changing colors
-			return nil
-		end
-
-		if self.color then
-			local newProperties = Instance.new("TextChatMessageProperties")
-
-			newProperties.PrefixText = `<font color='#{self.color:ToHex():lower()}'>{message.PrefixText}</font>`
-
-			return newProperties
-		else
-			return nil
-		end
-	end
-
-	return self
+	return self :: Types.Channel
 end

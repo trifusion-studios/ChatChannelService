@@ -1,3 +1,5 @@
+--!strict
+
 export type ChannelList = Frame
 
 return function()
@@ -9,9 +11,9 @@ return function()
 	ChannelsFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	ChannelsFrame.BorderSizePixel = 0
 	ChannelsFrame.ClipsDescendants = false
-	ChannelsFrame.Position = UDim2.fromOffset(10, 225)
+	ChannelsFrame.Position = UDim2.fromOffset(0, 0)
 	ChannelsFrame.Selectable = true
-	ChannelsFrame.Size = UDim2.new(00, 450, 0, 30)
+	ChannelsFrame.Size = UDim2.fromScale(1, 1)
 	ChannelsFrame.ZIndex = 2
 	ChannelsFrame.SelectionGroup = true
 	ChannelsFrame.LayoutOrder = 5

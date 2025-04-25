@@ -4,16 +4,14 @@
     Template:
         ["Channel match format"] = NewName funcion
 ]]
+--!strict
 
 local Players = game:GetService("Players")
 local Teams = game:GetService("Teams")
 
 local Types = require(script.Parent.Parent.Parent:WaitForChild("Utils"):WaitForChild("Types"))
 
-local function FindPlayerByUserId(userid: number? | string?): Player?
-	if typeof(userid) == "string" then
-		userid = tonumber(userid)
-	end
+local function FindPlayerByUserId(userid: number?): Player?
 	for _, player: Player in Players:GetPlayers() do
 		if player.UserId == userid then
 			return player
@@ -24,8 +22,8 @@ local function FindPlayerByUserId(userid: number? | string?): Player?
 end
 
 local function GetTeamFromColor(color: BrickColor): Team?
-	for _, team in Teams:GetTeams() do
-		if team.TeamColor == color then
+	for _, team: Team in Teams:GetTeams() do
+		if (team :: Team).TeamColor == color then
 			return team
 		end
 	end
@@ -37,13 +35,13 @@ return {
 	["Whisper:"] = function(_, name: string)
 		local newName = ""
 		local split = name:gsub("Whisper:", ""):split("_")
-		local possibleTarget = FindPlayerByUserId(split[2])
+		local possibleTarget = FindPlayerByUserId(tonumber(split[2]))
 
 		-- Prevent target from being local player
 		if possibleTarget == Players.LocalPlayer then
-			possibleTarget = FindPlayerByUserId(split[1])
+			possibleTarget = FindPlayerByUserId(tonumber(split[1]))
 			newName = possibleTarget and possibleTarget.Name or "Whisper"
-		elseif possibleTarget ~= Players.LocalPlayer then
+		elseif possibleTarget and possibleTarget ~= Players.LocalPlayer then
 			newName = possibleTarget.Name
 		end
 
@@ -63,4 +61,4 @@ return {
 
 		return newName
 	end,
-} :: {[string]: (self: Types.ChatChannelServiceClient, name: string) -> string}
+} :: { [string]: (self: Types.ChatChannelServiceClient, name: string) -> string }

@@ -3,9 +3,10 @@
 
     @GGshor
 ]]
+--!strict
 
 -- Merges tables
-local function MergeTables(originalTable: {}, newTable: {})
+local function MergeTables(originalTable, newTable)
 	local mergedTable = originalTable
 
 	for k, v in pairs(newTable) do
@@ -19,6 +20,6 @@ local function MergeTables(originalTable: {}, newTable: {})
 	return mergedTable
 end
 
-return function(DefaultTheme: {}, NewTheme: {}): {}
-    return MergeTables(DefaultTheme, NewTheme)
+return function(DefaultTheme, NewTheme): {}
+	return MergeTables(DefaultTheme, NewTheme)
 end
